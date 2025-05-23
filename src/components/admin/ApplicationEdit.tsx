@@ -315,6 +315,7 @@ const ApplicationEdit: React.FC = () => {
                     required
                   >
                     <option value="u-11">Under-11</option>
+                    <option value="u-13">Under-13</option>
                     <option value="u-15">Under-15</option>
                     <option value="u-17">Under-17</option>
                     <option value="open">Open</option>

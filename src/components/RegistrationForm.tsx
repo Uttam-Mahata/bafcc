@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import PersonalInfo from './PersonalInfo';
 import ContactInfo from './ContactInfo';
 import SchoolInfo from './SchoolInfo';
@@ -37,7 +37,6 @@ interface FormData {
   playingPosition: string;
   medicalIssues: string;
   category: string;
-  registrationNumber: string;
 }
 
 const RegistrationForm: React.FC = () => {
@@ -71,26 +70,12 @@ const RegistrationForm: React.FC = () => {
     currentClass: '',
     playingPosition: 'striker',
     medicalIssues: '',
-    category: 'u-11',
-    registrationNumber: ''
+    category: 'u-11'
   });
 
   const [submitting, setSubmitting] = useState(false);
+  const [submittedRegistrationNumber, setSubmittedRegistrationNumber] = useState<string>('');
   const applicationService = ApplicationService.getInstance();
-
-  // Generate unique registration number when category changes
-  useEffect(() => {
-    generateRegistrationNumber(formData.category);
-  }, [formData.category]);
-
-  const generateRegistrationNumber = (category: string) => {
-    const prefix = category.toUpperCase().replace('-', '');
-    const timestamp = new Date().getTime().toString().slice(-6);
-    const random = Math.floor(Math.random() * 900 + 100);
-    const regNumber = `${prefix}-${timestamp}-${random}`;
-    
-    setFormData(prev => ({ ...prev, registrationNumber: regNumber }));
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -155,13 +140,10 @@ const RegistrationForm: React.FC = () => {
       toast.success(`Application submitted successfully! Registration Number: ${response.registration_number}`);
       console.log('Application created:', response);
       
-      // Update the form with the returned registration number
-      setFormData(prev => ({
-        ...prev,
-        registrationNumber: response.registration_number
-      }));
+      // Set the registration number from response
+      setSubmittedRegistrationNumber(response.registration_number);
       
-      // Optionally redirect to a success page or clear the form after a delay
+      // Clear form after 10 seconds to allow user to see and note down the registration number
       setTimeout(() => {
         setFormData({
           name: '',
@@ -193,10 +175,10 @@ const RegistrationForm: React.FC = () => {
           currentClass: '',
           playingPosition: 'striker',
           medicalIssues: '',
-          category: 'u-11',
-          registrationNumber: ''
+          category: 'u-11'
         });
-      }, 5000); // Clear form after 5 seconds to allow user to see the registration number
+        setSubmittedRegistrationNumber('');
+      }, 10000); // Clear form after 10 seconds
       
     } catch (error) {
       console.error('Error submitting application:', error);
@@ -215,10 +197,24 @@ const RegistrationForm: React.FC = () => {
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-lg p-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {submittedRegistrationNumber && (
+          <div className="md:col-span-2 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-md mb-4">
+            <div className="flex items-center">
+              <div className="flex-1">
+                <p className="font-semibold">Application Submitted Successfully!</p>
+                <p>Your Registration Number: <span className="font-bold text-lg">{submittedRegistrationNumber}</span></p>
+                <p className="text-sm mt-1">Please note down this registration number for future reference.</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="md:col-span-2 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <h3 className="text-lg font-semibold">
-            Registration No: <span className="text-blue-600">{formData.registrationNumber}</span>
-          </h3>
+          {!submittedRegistrationNumber && (
+            <h3 className="text-lg font-semibold text-gray-600">
+              Registration Number will be generated after submission
+            </h3>
+          )}
           
           <div className="w-full md:w-auto flex flex-col items-center">
             <div className="h-32 w-32 border border-gray-300 rounded-lg overflow-hidden bg-gray-100 mb-2">

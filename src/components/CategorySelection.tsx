@@ -19,6 +19,7 @@ const CategorySelection: React.FC<CategorySelectionProps> = ({ category, handleC
         className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
       >
         <option value="u-11">Under-11</option>
+        <option value="u-13">Under-13</option>
         <option value="u-15">Under-15</option>
         <option value="u-17">Under-17</option>
         <option value="open">Open</option>
