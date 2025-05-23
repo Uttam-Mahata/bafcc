@@ -424,6 +424,20 @@ const ApplicationEdit: React.FC = () => {
                     />
                   </div>
                   <div>
+                    <label htmlFor="address.police_station" className="block text-sm font-medium text-gray-700 mb-1">
+                      Police Station
+                    </label>
+                    <input
+                      type="text"
+                      id="address.police_station"
+                      name="address.police_station"
+                      value={application.address.police_station}
+                      onChange={handleInputChange}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      required
+                    />
+                  </div>
+                  <div>
                     <label htmlFor="address.district" className="block text-sm font-medium text-gray-700 mb-1">
                       District
                     </label>
@@ -479,6 +493,19 @@ const ApplicationEdit: React.FC = () => {
                       id="current_address.post_office"
                       name="current_address.post_office"
                       value={application.current_address.post_office || ''}
+                      onChange={handleInputChange}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="current_address.police_station" className="block text-sm font-medium text-gray-700 mb-1">
+                      Police Station
+                    </label>
+                    <input
+                      type="text"
+                      id="current_address.police_station"
+                      name="current_address.police_station"
+                      value={application.current_address.police_station || ''}
                       onChange={handleInputChange}
                       className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />

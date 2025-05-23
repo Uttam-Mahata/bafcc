@@ -6,6 +6,7 @@ import AdminLogin from './components/admin/Login';
 import AdminDashboard from './components/admin/Dashboard';
 import ApplicationView from './components/admin/ApplicationView';
 import ApplicationEdit from './components/admin/ApplicationEdit';
+import ApplicationPrintView from './components/admin/ApplicationPrintView';
 import ProtectedRoute from './components/admin/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 import { ToastContainer } from 'react-toastify';
@@ -75,6 +76,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ApplicationEdit />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/print/:id" 
+              element={
+                <ProtectedRoute>
+                  <ApplicationPrintView />
                 </ProtectedRoute>
               } 
             />

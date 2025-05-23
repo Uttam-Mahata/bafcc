@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { pdf } from '@react-pdf/renderer';
+// @ts-ignore
+import { saveAs } from 'file-saver';
 import { ApplicationService, type Application } from '../../services/ApplicationService';
 import { useAuth } from '../../context/AuthContext';
+import ApplicationPDF from './ApplicationPDF';
 
 const AdminDashboard: React.FC = () => {
   const [applications, setApplications] = useState<Application[]>([]);
@@ -81,6 +85,19 @@ const AdminDashboard: React.FC = () => {
 
   const handleViewDetails = (id: string) => {
     navigate(`/admin/view/${id}`);
+  };
+
+  const handleDownloadPDF = async (id: string) => {
+    try {
+      const application = applications.find(app => app.id === parseInt(id));
+      if (application) {
+        const pdfDoc = await pdf(<ApplicationPDF application={application} />);
+        const pdfBlob = await pdfDoc.toBlob();
+        saveAs(pdfBlob, `${application.name}_application.pdf`);
+      }
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+    }
   };
 
   return (
@@ -222,6 +239,12 @@ const AdminDashboard: React.FC = () => {
                               className="text-red-600 hover:text-red-900"
                             >
                               Delete
+                            </button>
+                            <button
+                              onClick={() => handleDownloadPDF(app.id?.toString() || '')}
+                              className="text-green-600 hover:text-green-900 ml-3"
+                            >
+                              Download PDF
                             </button>
                           </td>
                         </tr>

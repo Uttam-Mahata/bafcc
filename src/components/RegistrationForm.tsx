@@ -23,12 +23,14 @@ interface FormData {
   address: {
     village: string;
     postOffice: string;
+    policeStation: string;
     district: string;
     pin: string;
   };
   currentAddress: {
     village: string;
     postOffice: string;
+    policeStation: string;
     district: string;
     pin: string;
   };
@@ -37,6 +39,7 @@ interface FormData {
   playingPosition: string;
   medicalIssues: string;
   category: string;
+  sameAddress: boolean;
 }
 
 const RegistrationForm: React.FC = () => {
@@ -57,12 +60,14 @@ const RegistrationForm: React.FC = () => {
     address: {
       village: '',
       postOffice: '',
+      policeStation: '',
       district: '',
       pin: ''
     },
     currentAddress: {
       village: '',
       postOffice: '',
+      policeStation: '',
       district: '',
       pin: ''
     },
@@ -70,7 +75,8 @@ const RegistrationForm: React.FC = () => {
     currentClass: '',
     playingPosition: 'striker',
     medicalIssues: '',
-    category: 'u-11'
+    category: 'u-11',
+    sameAddress: true
   });
 
   const [submitting, setSubmitting] = useState(false);
@@ -98,6 +104,38 @@ const RegistrationForm: React.FC = () => {
     }
   };
 
+  const handleSameAddressChange = (checked: boolean) => {
+    setFormData(prev => {
+      if (checked) {
+        // Copy permanent address to current address
+        return {
+          ...prev,
+          sameAddress: checked,
+          currentAddress: {
+            village: prev.address.village,
+            postOffice: prev.address.postOffice,
+            policeStation: prev.address.policeStation,
+            district: prev.address.district,
+            pin: prev.address.pin
+          }
+        };
+      } else {
+        // Clear current address when unchecked
+        return {
+          ...prev,
+          sameAddress: checked,
+          currentAddress: {
+            village: '',
+            postOffice: '',
+            policeStation: '',
+            district: '',
+            pin: ''
+          }
+        };
+      }
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -120,12 +158,14 @@ const RegistrationForm: React.FC = () => {
         address: {
           village: formData.address.village,
           post_office: formData.address.postOffice,
+          police_station: formData.address.policeStation,
           district: formData.address.district,
           pin: formData.address.pin
         },
         current_address: {
           village: formData.currentAddress.village,
           post_office: formData.currentAddress.postOffice,
+          police_station: formData.currentAddress.policeStation,
           district: formData.currentAddress.district,
           pin: formData.currentAddress.pin
         },
@@ -162,12 +202,14 @@ const RegistrationForm: React.FC = () => {
           address: {
             village: '',
             postOffice: '',
+            policeStation: '',
             district: '',
             pin: ''
           },
           currentAddress: {
             village: '',
             postOffice: '',
+            policeStation: '',
             district: '',
             pin: ''
           },
@@ -175,7 +217,8 @@ const RegistrationForm: React.FC = () => {
           currentClass: '',
           playingPosition: 'striker',
           medicalIssues: '',
-          category: 'u-11'
+          category: 'u-11',
+          sameAddress: true
         });
         setSubmittedRegistrationNumber('');
       }, 10000); // Clear form after 10 seconds
@@ -262,6 +305,7 @@ const RegistrationForm: React.FC = () => {
         <ContactInfo 
           formData={formData} 
           handleChange={handleChange} 
+          handleSameAddressChange={handleSameAddressChange}
         />
 
         <SchoolInfo 
