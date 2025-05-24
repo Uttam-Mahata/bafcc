@@ -1,11 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { pdf } from '@react-pdf/renderer';
-// @ts-ignore
-import { saveAs } from 'file-saver';
-import { ApplicationService, type Application } from '../../services/ApplicationService';
 import { useAuth } from '../../context/AuthContext';
+import { ApplicationService } from '../../services/ApplicationService';
+import type { Application } from '../../services/ApplicationService';
 import ApplicationPDF from './ApplicationPDF';
+import { pdf } from '@react-pdf/renderer';
+import { saveAs } from 'file-saver';
+import { 
+  LogOut, 
+  Search, 
+  Filter, 
+  Edit2, 
+  Eye, 
+  Download, 
+  Trash2, 
+  RefreshCw,
+  ChevronDown,
+  User
+} from 'lucide-react';
 
 const AdminDashboard: React.FC = () => {
   const [applications, setApplications] = useState<Application[]>([]);
@@ -101,43 +113,64 @@ const AdminDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="bg-blue-800 text-white p-4">
+    <div className="min-h-screen bg-gray-50">
+      {/* Modern header */}
+      <div className="bg-gradient-to-r from-blue-700 to-blue-900 text-white px-6 py-4 shadow-lg">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold">BAFCC Admin Dashboard</h1>
-          <div className="flex items-center">
-            <span className="mr-4">Welcome, {user?.full_name || user?.username}</span>
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 bg-white rounded-full flex items-center justify-center">
+              <span className="text-blue-700 font-bold text-sm">BAFC</span>
+            </div>
+            <h1 className="text-xl md:text-2xl font-bold">BAFCC Admin Dashboard</h1>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-2 bg-blue-800 bg-opacity-50 px-3 py-2 rounded-full">
+              <User size={18} />
+              <span>{user?.full_name || user?.username}</span>
+            </div>
             <button 
               onClick={handleLogout} 
-              className="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded"
+              className="flex items-center gap-1 bg-red-600 hover:bg-red-700 transition duration-150 text-white py-2 px-3 rounded-lg shadow-sm"
             >
-              Logout
+              <LogOut size={16} />
+              <span className="hidden md:inline">Logout</span>
             </button>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto py-6 px-4">
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-            <h2 className="text-lg font-semibold mb-4 md:mb-0">Applications</h2>
+      <div className="container mx-auto py-8 px-4">
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8 gap-4">
+            <div className="flex items-center gap-3">
+              <div className="bg-blue-100 rounded-lg p-2">
+                <Filter size={20} className="text-blue-700" />
+              </div>
+              <h2 className="text-xl font-semibold text-gray-800">Applications Manager</h2>
+            </div>
             
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="w-full md:w-auto">
+            <div className="flex flex-col md:flex-row gap-4 w-full lg:w-auto">
+              <div className="relative w-full md:w-64">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search size={18} className="text-gray-400" />
+                </div>
                 <input 
                   type="text" 
-                  placeholder="Search by registration number"
+                  placeholder="Search by registration no."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="pl-10 w-full py-2 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150"
                 />
               </div>
               
-              <div className="w-full md:w-auto">
+              <div className="relative w-full md:w-auto">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <ChevronDown size={18} className="text-gray-400" />
+                </div>
                 <select 
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="pl-10 w-full md:w-48 py-2 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 appearance-none bg-white"
                 >
                   <option value="all">All Categories</option>
                   <option value="u-11">Under-11</option>
@@ -147,53 +180,66 @@ const AdminDashboard: React.FC = () => {
                   <option value="open">Open</option>
                 </select>
               </div>
+              
+              <button 
+                onClick={fetchApplications} 
+                className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-150"
+              >
+                <RefreshCw size={16} className="text-white" />
+                <span>Refresh</span>
+              </button>
             </div>
           </div>
 
           {loading ? (
-            <div className="flex justify-center p-6">
-              <p>Loading applications...</p>
+            <div className="flex flex-col items-center justify-center p-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+              <p className="text-gray-500">Loading applications...</p>
             </div>
           ) : (
             <>
               {filteredApplications.length === 0 ? (
-                <div className="text-center p-6 border border-dashed border-gray-300 rounded-md">
-                  <p className="text-gray-500">No applications found</p>
+                <div className="text-center p-12 border border-dashed border-gray-300 rounded-xl bg-gray-50">
+                  <div className="flex justify-center mb-4">
+                    <Search size={48} className="text-gray-300" />
+                  </div>
+                  <p className="text-gray-500 font-medium">No applications found</p>
+                  <p className="text-gray-400 text-sm mt-1">Try changing your search criteria</p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto rounded-lg border border-gray-100">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Registration No.
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Name
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Applicant
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Category
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Contact
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Actions
                         </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {filteredApplications.map((app) => (
-                        <tr key={app.id} className="hover:bg-gray-50">
+                        <tr key={app.id} className="hover:bg-gray-50 transition duration-150">
                           <td className="px-6 py-4 whitespace-nowrap">
-                            {app.registration_number}
+                            <span className="font-mono text-sm text-gray-700">{app.registration_number}</span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <div className="h-10 w-10 flex-shrink-0">
                                 {app.image_url ? (
                                   <img
-                                    className="h-10 w-10 rounded-full object-cover"
+                                    className="h-10 w-10 rounded-full object-cover border border-gray-200"
                                     src={app.image_url}
                                     alt={app.name}
                                     onError={(e) => {
@@ -202,19 +248,19 @@ const AdminDashboard: React.FC = () => {
                                     }}
                                   />
                                 ) : (
-                                  <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                                    <span className="text-gray-500 text-xs">{app.name.charAt(0)}</span>
+                                  <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                    <span className="text-blue-600 font-semibold text-xs">{app.name.charAt(0).toUpperCase()}</span>
                                   </div>
                                 )}
                               </div>
                               <div className="ml-4">
                                 <div className="text-sm font-medium text-gray-900">{app.name}</div>
-                                <div className="text-sm text-gray-500">{app.age} years</div>
+                                <div className="text-xs text-gray-500">{app.age} years</div>
                               </div>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                            <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                               {app.category.toUpperCase()}
                             </span>
                           </td>
@@ -222,30 +268,36 @@ const AdminDashboard: React.FC = () => {
                             {app.mobile_number}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button
-                              onClick={() => handleViewDetails(app.id?.toString() || '')}
-                              className="text-blue-600 hover:text-blue-900 mr-3"
-                            >
-                              View
-                            </button>
-                            <button
-                              onClick={() => handleEdit(app.id?.toString() || '')}
-                              className="text-indigo-600 hover:text-indigo-900 mr-3"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => handleDelete(app.id?.toString() || '')}
-                              className="text-red-600 hover:text-red-900"
-                            >
-                              Delete
-                            </button>
-                            <button
-                              onClick={() => handleDownloadPDF(app.id?.toString() || '')}
-                              className="text-green-600 hover:text-green-900 ml-3"
-                            >
-                              Download PDF
-                            </button>
+                            <div className="flex items-center space-x-2">
+                              <button
+                                onClick={() => handleViewDetails(app.id?.toString() || '')}
+                                className="flex items-center justify-center bg-blue-50 hover:bg-blue-100 text-blue-600 p-2 rounded-lg transition duration-150"
+                                title="View Details"
+                              >
+                                <Eye size={16} />
+                              </button>
+                              <button
+                                onClick={() => handleEdit(app.id?.toString() || '')}
+                                className="flex items-center justify-center bg-indigo-50 hover:bg-indigo-100 text-indigo-600 p-2 rounded-lg transition duration-150"
+                                title="Edit"
+                              >
+                                <Edit2 size={16} />
+                              </button>
+                              <button
+                                onClick={() => handleDownloadPDF(app.id?.toString() || '')}
+                                className="flex items-center justify-center bg-green-50 hover:bg-green-100 text-green-600 p-2 rounded-lg transition duration-150"
+                                title="Download PDF"
+                              >
+                                <Download size={16} />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(app.id?.toString() || '')}
+                                className="flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-lg transition duration-150"
+                                title="Delete"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}

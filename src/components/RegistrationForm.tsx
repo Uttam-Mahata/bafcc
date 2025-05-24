@@ -81,10 +81,16 @@ const RegistrationForm: React.FC = () => {
 
   const [submitting, setSubmitting] = useState(false);
   const [submittedRegistrationNumber, setSubmittedRegistrationNumber] = useState<string>('');
+  const [submitError, setSubmitError] = useState<string>('');
   const applicationService = ApplicationService.getInstance();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    
+    // Clear any previous submit error when user starts typing
+    if (submitError) {
+      setSubmitError('');
+    }
     
     // Handle nested objects
     if (name.includes('.')) {
@@ -139,42 +145,71 @@ const RegistrationForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
+    setSubmitError('');
 
     try {
+      // Validate required fields
+      if (!formData.name.trim()) {
+        throw new Error('Name is required');
+      }
+      if (!formData.fatherName.trim()) {
+        throw new Error('Father\'s name is required');
+      }
+      if (!formData.motherName.trim()) {
+        throw new Error('Mother\'s name is required');
+      }
+      if (!formData.dob) {
+        throw new Error('Date of birth is required');
+      }
+      if (!formData.age || parseInt(formData.age) < 5 || parseInt(formData.age) > 25) {
+        throw new Error('Age must be between 5 and 25');
+      }
+      if (!formData.mobileNumber.trim() || formData.mobileNumber.length !== 10) {
+        throw new Error('Valid 10-digit mobile number is required');
+      }
+      if (!formData.address.village.trim()) {
+        throw new Error('Permanent address village is required');
+      }
+
+      console.log('Submitting application with category:', formData.category);
+      
       const apiData = {
-        name: formData.name,
-        father_name: formData.fatherName,
-        mother_name: formData.motherName,
-        guardian_name: formData.guardianName || undefined,
+        name: formData.name.trim(),
+        father_name: formData.fatherName.trim(),
+        mother_name: formData.motherName.trim(),
+        guardian_name: formData.guardianName.trim() || undefined,
         dob: formData.dob,
         gender: formData.gender,
         age: formData.age,
         height: formData.height,
         weight: formData.weight,
-        aadhar_number: formData.aadharNumber || undefined,
-        mobile_number: formData.mobileNumber,
-        alternate_mobile_number: formData.alternateMobileNumber || undefined,
-        image_url: formData.imageUrl || undefined,
+        aadhar_number: formData.aadharNumber.trim() || undefined,
+        mobile_number: formData.mobileNumber.trim(),
+        alternate_mobile_number: formData.alternateMobileNumber.trim() || undefined,
+        image_url: formData.imageUrl.trim() || undefined,
         address: {
-          village: formData.address.village,
-          post_office: formData.address.postOffice,
-          police_station: formData.address.policeStation,
-          district: formData.address.district,
-          pin: formData.address.pin
+          village: formData.address.village.trim(),
+          post_office: formData.address.postOffice.trim(),
+          police_station: formData.address.policeStation.trim(),
+          district: formData.address.district.trim(),
+          pin: formData.address.pin.trim()
         },
         current_address: {
-          village: formData.currentAddress.village,
-          post_office: formData.currentAddress.postOffice,
-          police_station: formData.currentAddress.policeStation,
-          district: formData.currentAddress.district,
-          pin: formData.currentAddress.pin
+          village: formData.currentAddress.village.trim() || formData.address.village.trim(),
+          post_office: formData.currentAddress.postOffice.trim() || formData.address.postOffice.trim(),
+          police_station: formData.currentAddress.policeStation.trim() || formData.address.policeStation.trim(),
+          district: formData.currentAddress.district.trim() || formData.address.district.trim(),
+          pin: formData.currentAddress.pin.trim() || formData.address.pin.trim()
         },
-        school_name: formData.schoolName,
-        current_class: formData.currentClass,
+        school_name: formData.schoolName.trim(),
+        current_class: formData.currentClass.trim(),
         playing_position: formData.playingPosition,
-        medical_issues: formData.medicalIssues || undefined,
+        medical_issues: formData.medicalIssues.trim() || undefined,
         category: formData.category
       };
+
+      console.log('API Data being sent:', apiData);
+      
       const response = await applicationService.createApplication(apiData);
       
       toast.success(`Application submitted successfully! Registration Number: ${response.registration_number}`);
@@ -223,9 +258,19 @@ const RegistrationForm: React.FC = () => {
         setSubmittedRegistrationNumber('');
       }, 10000); // Clear form after 10 seconds
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting application:', error);
-      toast.error('Failed to submit application. Please try again.');
+      
+      let errorMessage = 'Failed to submit application. Please try again.';
+      
+      if (error.response?.data?.detail) {
+        errorMessage = error.response.data.detail;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setSubmitError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -247,6 +292,18 @@ const RegistrationForm: React.FC = () => {
                 <p className="font-semibold">Application Submitted Successfully!</p>
                 <p>Your Registration Number: <span className="font-bold text-lg">{submittedRegistrationNumber}</span></p>
                 <p className="text-sm mt-1">Please note down this registration number for future reference.</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {submitError && (
+          <div className="md:col-span-2 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md mb-4">
+            <div className="flex items-center">
+              <div className="flex-1">
+                <p className="font-semibold">Submission Failed</p>
+                <p className="text-sm mt-1">{submitError}</p>
+                <p className="text-xs mt-2">Please check your information and try again.</p>
               </div>
             </div>
           </div>

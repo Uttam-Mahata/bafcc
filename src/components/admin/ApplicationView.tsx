@@ -5,6 +5,24 @@ import { pdf } from '@react-pdf/renderer';
 import { saveAs } from 'file-saver';
 import { ApplicationService, type Application } from '../../services/ApplicationService';
 import ApplicationPDF from './ApplicationPDF';
+import { 
+  ArrowLeft, 
+  Edit, 
+  FileDown, 
+  Printer, 
+  Trash2, 
+  User, 
+  Mail, 
+  Phone, 
+  MapPin, 
+  School, 
+  CalendarDays, 
+  Ruler, 
+  Weight, 
+  UserCircle, 
+  ScrollText, 
+  HeartPulse 
+} from 'lucide-react';
 
 const ApplicationView: React.FC = () => {
   const [application, setApplication] = useState<Application | null>(null);
@@ -112,70 +130,84 @@ const ApplicationView: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8 px-4">
+    <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="container mx-auto">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex justify-between items-center mb-6">
+        {/* Application Card with elevation */}
+        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+          {/* Header with action buttons */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">Application Details</h1>
-              <p className="text-gray-600">Registration No: {application.registration_number}</p>
+              <div className="flex items-center gap-2">
+                <ScrollText size={24} className="text-blue-600" />
+                <h1 className="text-2xl font-bold text-gray-800">Application Details</h1>
+              </div>
+              <div className="flex items-center mt-1">
+                <p className="text-gray-500 font-mono text-sm bg-blue-50 px-2 py-1 rounded-md">
+                  Registration: {application.registration_number}
+                </p>
+              </div>
             </div>
-            <div className="flex space-x-2">
+            
+            <div className="flex flex-wrap gap-2">
               <button 
                 onClick={handleBack}
-                className="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600"
+                className="flex items-center gap-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg transition duration-150 border border-gray-200"
               >
-                Back
+                <ArrowLeft size={18} />
+                <span>Back</span>
               </button>
               <button 
                 onClick={handleEdit}
-                className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+                className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-150"
               >
-                Edit
+                <Edit size={18} />
+                <span>Edit</span>
               </button>
               <button 
                 onClick={handleDownloadPDF}
                 disabled={generatingPDF}
-                className={`py-2 px-4 rounded text-white ${
+                className={`flex items-center gap-1 py-2 px-4 rounded-lg transition duration-150 ${
                   generatingPDF 
-                    ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-green-600 hover:bg-green-700'
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                    : 'bg-green-600 hover:bg-green-700 text-white'
                 }`}
               >
                 {generatingPDF ? (
-                  <span className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <>
+                    <svg className="animate-spin h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Generating...
-                  </span>
+                    <span>Generating...</span>
+                  </>
                 ) : (
                   <>
-                    <span className="mr-2">📄</span>
-                    Download PDF
+                    <FileDown size={18} />
+                    <span>Download PDF</span>
                   </>
                 )}
               </button>
               <button 
                 onClick={handlePrint}
-                className="bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700"
+                className="flex items-center gap-1 bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg transition duration-150"
               >
-                <span className="mr-2">🖨️</span>
-                Print View
+                <Printer size={18} />
+                <span>Print View</span>
               </button>
               <button 
                 onClick={handleDelete}
-                className="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700"
+                className="flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg transition duration-150"
               >
-                Delete
+                <Trash2 size={18} />
+                <span>Delete</span>
               </button>
             </div>
           </div>
 
-          <div className="flex flex-col md:flex-row mb-8">
-            <div className="md:w-1/4 flex justify-center mb-4 md:mb-0">
-              <div className="h-40 w-40 border border-gray-300 rounded-lg overflow-hidden bg-gray-100">
+          {/* Applicant Info Section */}
+          <div className="flex flex-col lg:flex-row mb-8 gap-6">
+            <div className="lg:w-1/4 flex flex-col items-center">
+              <div className="h-48 w-48 border-4 border-gray-100 rounded-xl overflow-hidden bg-gray-50 shadow-md">
                 {application.image_url ? (
                   <img 
                     src={application.image_url} 
@@ -187,17 +219,30 @@ const ApplicationView: React.FC = () => {
                     }}
                   />
                 ) : (
-                  <div className="h-full w-full flex items-center justify-center">
-                    <span className="text-gray-500">No Photo</span>
+                  <div className="h-full w-full flex flex-col items-center justify-center">
+                    <UserCircle size={64} className="text-gray-300 mb-2" />
+                    <span className="text-gray-400 text-sm">No Photo Available</span>
                   </div>
                 )}
               </div>
+
+              <div className="mt-4 bg-blue-50 p-3 rounded-lg border border-blue-100 w-full">
+                <div className="text-center">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    {application.category.toUpperCase()}
+                  </span>
+                </div>
+              </div>
             </div>
-            <div className="md:w-3/4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="border-b pb-2">
-                  <p className="text-sm text-gray-500">Category</p>
-                  <p className="font-semibold">{application.category.toUpperCase()}</p>
+
+            <div className="lg:w-3/4 bg-gray-50 rounded-lg p-4 border border-gray-100">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="flex items-start space-x-3 p-3 bg-white rounded-lg border border-gray-100 shadow-sm">
+                  <User size={18} className="text-blue-600 mt-0.5" />
+                  <div>
+                    <p className="text-sm text-gray-500">Full Name</p>
+                    <p className="font-medium">{application.name}</p>
+                  </div>
                 </div>
                 <div className="border-b pb-2">
                   <p className="text-sm text-gray-500">Submitted On</p>
@@ -256,93 +301,146 @@ const ApplicationView: React.FC = () => {
           </div>
 
           <div className="mb-8">
-            <h2 className="text-lg font-semibold border-b pb-2 mb-4">Contact Information</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div>
-                <p className="text-sm text-gray-500">Mobile Number</p>
-                <p className="font-semibold">{application.mobile_number}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Alternate Mobile Number</p>
-                <p className="font-semibold">{application.alternate_mobile_number || 'N/A'}</p>
-              </div>
+            <div className="flex items-center gap-2 mb-4">
+              <Phone size={20} className="text-blue-600" />
+              <h2 className="text-lg font-semibold text-gray-800">Contact Information</h2>
             </div>
             
-            <div className="mb-4">
-              <h3 className="font-medium mb-2">Permanent Address</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-gray-500">Village/Area</p>
-                  <p className="font-semibold">{application.address.village}</p>
+            <div className="bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <Phone size={18} className="text-blue-600 mt-0.5" />
+                  <div>
+                    <p className="text-sm text-gray-500">Primary Contact</p>
+                    <p className="font-medium">{application.mobile_number}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-500">Post Office</p>
-                  <p className="font-semibold">{application.address.post_office}</p>
+                
+                {application.alternate_mobile_number && (
+                  <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <Phone size={18} className="text-blue-600 mt-0.5" />
+                    <div>
+                      <p className="text-sm text-gray-500">Alternate Contact</p>
+                      <p className="font-medium">{application.alternate_mobile_number}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <MapPin size={18} className="text-blue-600" />
+                  <h3 className="font-medium text-gray-800">Permanent Address</h3>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-500">Police Station</p>
-                  <p className="font-semibold">{application.address.police_station}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">District</p>
-                  <p className="font-semibold">{application.address.district}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">PIN</p>
-                  <p className="font-semibold">{application.address.pin}</p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-7">
+                  <div className="flex flex-col">
+                    <span className="text-sm text-gray-500">Village</span>
+                    <span className="font-medium">{application.address.village || 'N/A'}</span>
+                  </div>
+                  
+                  <div className="flex flex-col">
+                    <span className="text-sm text-gray-500">Post Office</span>
+                    <span className="font-medium">{application.address.post_office || 'N/A'}</span>
+                  </div>
+                  
+                  <div className="flex flex-col">
+                    <span className="text-sm text-gray-500">Police Station</span>
+                    <span className="font-medium">{application.address.police_station || 'N/A'}</span>
+                  </div>
+                  
+                  <div className="flex flex-col">
+                    <span className="text-sm text-gray-500">District</span>
+                    <span className="font-medium">{application.address.district || 'N/A'}</span>
+                  </div>
+                  
+                  <div className="flex flex-col">
+                    <span className="text-sm text-gray-500">PIN</span>
+                    <span className="font-medium">{application.address.pin || 'N/A'}</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {application.current_address.village && (
-              <div>
-                <h3 className="font-medium mb-2">Current Address</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-gray-500">Village/Area</p>
-                    <p className="font-semibold">{application.current_address.village}</p>
+              {application.current_address && application.current_address.village && (
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <MapPin size={18} className="text-blue-600" />
+                    <h3 className="font-medium text-gray-800">Current Address</h3>
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Post Office</p>
-                    <p className="font-semibold">{application.current_address.post_office}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Police Station</p>
-                    <p className="font-semibold">{application.current_address.police_station}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">District</p>
-                    <p className="font-semibold">{application.current_address.district}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">PIN</p>
-                    <p className="font-semibold">{application.current_address.pin}</p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-7">
+                    <div className="flex flex-col">
+                      <span className="text-sm text-gray-500">Village</span>
+                      <span className="font-medium">{application.current_address.village || 'N/A'}</span>
+                    </div>
+                    
+                    <div className="flex flex-col">
+                      <span className="text-sm text-gray-500">Post Office</span>
+                      <span className="font-medium">{application.current_address.post_office || 'N/A'}</span>
+                    </div>
+                    
+                    <div className="flex flex-col">
+                      <span className="text-sm text-gray-500">Police Station</span>
+                      <span className="font-medium">{application.current_address.police_station || 'N/A'}</span>
+                    </div>
+                    
+                    <div className="flex flex-col">
+                      <span className="text-sm text-gray-500">District</span>
+                      <span className="font-medium">{application.current_address.district || 'N/A'}</span>
+                    </div>
+                    
+                    <div className="flex flex-col">
+                      <span className="text-sm text-gray-500">PIN</span>
+                      <span className="font-medium">{application.current_address.pin || 'N/A'}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           <div className="mb-8">
-            <h2 className="text-lg font-semibold border-b pb-2 mb-4">School & Football Information</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div>
-                <p className="text-sm text-gray-500">School Name</p>
-                <p className="font-semibold">{application.school_name}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Current Class</p>
-                <p className="font-semibold">{application.current_class}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Playing Position</p>
-                <p className="font-semibold">{application.playing_position}</p>
-              </div>
+            <div className="flex items-center gap-2 mb-4">
+              <School size={20} className="text-blue-600" />
+              <h2 className="text-lg font-semibold text-gray-800">School & Football Information</h2>
             </div>
             
-            <div>
-              <p className="text-sm text-gray-500">Medical Issues</p>
-              <p className="font-semibold">{application.medical_issues || 'None'}</p>
+            <div className="bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2 mb-1">
+                    <School size={16} className="text-blue-600" />
+                    <span className="text-sm text-gray-500">School Name</span>
+                  </div>
+                  <span className="font-medium pl-6">{application.school_name || 'N/A'}</span>
+                </div>
+                
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2 mb-1">
+                    <ScrollText size={16} className="text-blue-600" />
+                    <span className="text-sm text-gray-500">Current Class</span>
+                  </div>
+                  <span className="font-medium pl-6">{application.current_class || 'N/A'}</span>
+                </div>
+                
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2 mb-1">
+                    <User size={16} className="text-blue-600" />
+                    <span className="text-sm text-gray-500">Playing Position</span>
+                  </div>
+                  <span className="font-medium pl-6">{application.playing_position || 'N/A'}</span>
+                </div>
+                
+                {application.medical_issues && (
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-2 mb-1">
+                      <HeartPulse size={16} className="text-blue-600" />
+                      <span className="text-sm text-gray-500">Medical Issues</span>
+                    </div>
+                    <span className="font-medium pl-6">{application.medical_issues}</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -351,4 +449,4 @@ const ApplicationView: React.FC = () => {
   );
 };
 
-export default ApplicationView; 
+export default ApplicationView;

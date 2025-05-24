@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { User, Lock, LogIn } from 'lucide-react';
 
 interface LocationState {
   from: {
@@ -47,52 +48,67 @@ const AdminLogin: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-gray-100">
+      <div className="bg-white p-10 rounded-xl shadow-xl w-full max-w-md border border-gray-100">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-blue-800">BAFCC Admin</h1>
-          <p className="text-gray-600">Login to manage applications</p>
+          <div className="flex justify-center mb-4">
+            <div className="h-16 w-16 bg-blue-600 rounded-full flex items-center justify-center">
+              <LogIn size={32} className="text-white" />
+            </div>
+          </div>
+          <h1 className="text-3xl font-bold text-blue-800 mb-2">BAFCC Admin</h1>
+          <p className="text-gray-500 text-sm">Login to manage applications</p>
         </div>
         
         {error && (
-          <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+          <div className="mb-6 bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-md relative">
             <span className="block sm:inline">{error}</span>
           </div>
         )}
         
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
+          <div className="space-y-2">
             <label htmlFor="username" className="block text-sm font-medium text-gray-700">
               Username
             </label>
-            <input
-              id="username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              required
-            />
+            <div className="relative rounded-md shadow-sm">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <User size={18} className="text-gray-400" />
+              </div>
+              <input
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="pl-10 block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150"
+                required
+              />
+            </div>
           </div>
           
-          <div>
+          <div className="space-y-2">
             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
               Password
             </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              required
-            />
+            <div className="relative rounded-md shadow-sm">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Lock size={18} className="text-gray-400" />
+              </div>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="pl-10 block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150"
+                required
+              />
+            </div>
           </div>
           
           <button
             type="submit"
             disabled={loading}
-            className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
+            className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition duration-150 ${
               loading 
                 ? 'bg-blue-400 cursor-not-allowed' 
                 : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
@@ -107,7 +123,10 @@ const AdminLogin: React.FC = () => {
                 Logging in...
               </>
             ) : (
-              'Login'
+              <span className="flex items-center">
+                <LogIn size={18} className="mr-2" /> 
+                Login
+              </span>
             )}
           </button>
         </form>
