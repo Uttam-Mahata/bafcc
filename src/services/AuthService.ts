@@ -1,7 +1,7 @@
 import axios, { AxiosError } from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://bafcc-server.onrender.com';
-// const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+// const API_URL = import.meta.env.VITE_API_URL || 'https://bafcc-server.onrender.com';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export interface LoginResponse {
   access_token: string;
@@ -65,7 +65,7 @@ export class AuthService {
       async (error: AxiosError) => {
         const originalRequest = error.config as any;
 
-        if (error.response?.status === 401 && !originalRequest._retry && this.refreshToken) {
+        if (error.response?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
 
           try {
@@ -73,13 +73,9 @@ export class AuthService {
             originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
             return axios(originalRequest);
           } catch (refreshError) {
-            // Refresh failed, clear tokens but don't redirect automatically
-            // Let the component handle the redirect
-            console.error('Token refresh failed:', refreshError);
-            this.accessToken = null;
-            this.refreshToken = null;
-            localStorage.removeItem('bafcc_access_token');
-            localStorage.removeItem('bafcc_refresh_token');
+            // Refresh failed, redirect to login
+            this.logout();
+            window.location.href = '/admin/login';
             return Promise.reject(refreshError);
           }
         }
@@ -199,24 +195,7 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    if (!this.accessToken) return false;
-    
-    // Only check if token is actually expired, not about to expire
-    try {
-      const payload = JSON.parse(atob(this.accessToken.split('.')[1]));
-      const expirationTime = payload.exp * 1000;
-      const currentTime = Date.now();
-      
-      // Token is expired if current time is past expiration
-      if (expirationTime <= currentTime) {
-        return false;
-      }
-    } catch (error) {
-      // If we can't decode the token, consider it invalid
-      return false;
-    }
-    
-    return true;
+    return !!this.accessToken && !this.isTokenLikelyExpired();
   }
 
   // Check if token is likely expired (without making a request)
@@ -229,8 +208,8 @@ export class AuthService {
       const expirationTime = payload.exp * 1000; // Convert to milliseconds
       const currentTime = Date.now();
       
-      // Consider token expired if it expires within the next 1 minute (reduced from 5 minutes)
-      return expirationTime <= currentTime + (1 * 60 * 1000);
+      // Consider token expired if it expires within the next 5 minutes
+      return expirationTime <= currentTime + (5 * 60 * 1000);
     } catch (error) {
       // If we can't decode the token, consider it expired
       return true;
