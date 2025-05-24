@@ -1,22 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ApplicationService, type Application } from '../../services/ApplicationService';
-import { 
-  Save, 
-  ArrowLeft, 
-  User, 
-  Users, 
-  Calendar, 
-  Ruler, 
-  Weight, 
-  Phone, 
-  Mail, 
-  MapPin, 
-  School, 
-  Briefcase, 
-  HeartPulse, 
-  Image as ImageIcon
-} from 'lucide-react';
 
 const ApplicationEdit: React.FC = () => {
   const [application, setApplication] = useState<Application | null>(null);
