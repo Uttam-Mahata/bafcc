@@ -12,13 +12,9 @@ import {
   Printer, 
   Trash2, 
   User, 
-  Mail, 
   Phone, 
   MapPin, 
   School, 
-  CalendarDays, 
-  Ruler, 
-  Weight, 
   UserCircle, 
   ScrollText, 
   HeartPulse 
