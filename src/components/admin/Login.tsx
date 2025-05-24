@@ -27,6 +27,8 @@ const AdminLogin: React.FC = () => {
     try {
       const success = await login(username, password);
       if (success) {
+        // Small delay to ensure auth context state is updated
+        await new Promise(resolve => setTimeout(resolve, 100));
         // Navigate to the page user tried to visit before being redirected to login
         navigate(from, { replace: true });
       } else {

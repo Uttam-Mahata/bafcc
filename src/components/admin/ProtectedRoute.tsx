@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
@@ -8,9 +8,19 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
+  const [timeoutReached, setTimeoutReached] = useState(false);
 
-  // Show loading spinner while checking authentication
-  if (loading) {
+  // Set a timeout to prevent infinite loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setTimeoutReached(true);
+    }, 10000); // 10 second timeout (increased from 5)
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Show loading spinner while checking authentication (with timeout)
+  if (loading && !timeoutReached) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -21,8 +31,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
-  // Redirect to login if not authenticated
-  if (!isAuthenticated) {
+  // If timeout reached or not authenticated, redirect to login
+  if (timeoutReached || !isAuthenticated) {
     return <Navigate to="/admin/login" replace />;
   }
 
