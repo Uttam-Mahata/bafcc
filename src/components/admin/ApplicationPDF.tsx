@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    marginBottom: 20,
+    marginBottom: 15, // Changed from 20
     alignItems: 'center',
     borderBottomWidth: 2,
     borderBottomColor: '#2D3748',
@@ -65,6 +65,9 @@ const styles = StyleSheet.create({
     fontSize: 8,
     color: '#666',
     textAlign: 'center',
+    // Allow text to take up more space if needed and wrap
+    flexShrink: 1,
+    paddingHorizontal: 2, // Add some horizontal padding
   },
   mainContent: {
     flexDirection: 'row',
@@ -80,11 +83,14 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 11,
     fontWeight: 'bold',
-    marginBottom: 8,
+    marginBottom: 6, // Changed from 8
     marginTop: 10,
-    backgroundColor: '#f8f9fa',
-    padding: 3,
-    textAlign: 'center',
+    // backgroundColor: '#f8f9fa', // Removed
+    padding: 4, // Changed from 3, assuming all sides
+    textAlign: 'left', // Changed from 'center'
+    borderBottomWidth: 0.5, // Added
+    borderBottomColor: '#AEAEAE', // Added
+    color: '#1A202C', // Added
   },
   row: {
     flexDirection: 'row',
@@ -103,11 +109,12 @@ const styles = StyleSheet.create({
     fontSize: 8,
     fontWeight: 'bold',
     color: '#4A5568',
+    marginBottom: 1, // Added
   },
   value: {
     fontSize: 9,
     color: '#2D3748',
-    marginTop: 1,
+    marginTop: 2, // Changed from 1
   },
   addressGrid: {
     flexDirection: 'row',
@@ -160,7 +167,7 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 15,
+    marginTop: 20, // Changed from 15
     paddingTop: 10,
     borderTopWidth: 1,
     borderTopColor: '#E2E8F0',
@@ -208,11 +215,9 @@ const ApplicationPDF: React.FC<ApplicationPDFProps> = ({ application }) => {
           url.hostname.includes('blogspot.com') ||
           url.hostname.includes('googleapis.com')) {
         return (
-          <View>
-            <Text style={styles.noPhoto}>Passport</Text>
-            <Text style={styles.noPhoto}>Size</Text>
-            <Text style={styles.noPhoto}>Photograph</Text>
-          </View>
+          <Text style={styles.noPhoto}>
+            Photo not loadable due to restrictions. Please affix manually.
+          </Text>
         );
       }
 

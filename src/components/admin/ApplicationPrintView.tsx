@@ -158,12 +158,20 @@ const ApplicationPrintView: React.FC = () => {
             align-items: center;
             justify-content: center;
             margin-left: 10px;
+            overflow: hidden; /* Added */
           }
           
           .print-photo img {
             width: 65px;
             height: 85px;
             object-fit: cover;
+          }
+
+          .print-photo-placeholder-text {
+            font-size: 8pt;
+            text-align: center;
+            color: #666;
+            padding: 5px;
           }
           
           .print-reg-number {
@@ -194,10 +202,12 @@ const ApplicationPrintView: React.FC = () => {
           .print-section {
             font-size: 11pt;
             font-weight: bold;
-            margin: 10px 0 8px 0;
-            background: #f8f9fa;
-            padding: 3px;
-            text-align: center;
+            margin: 10px 0 6px 0; /* Changed */
+            /* background: #f8f9fa; */ /* Removed */
+            padding: 4px; /* Changed */
+            text-align: left; /* Changed */
+            border-bottom: 0.5px solid #AEAEAE; /* Added */
+            color: #1A202C; /* Added */
           }
           
           .print-row {
@@ -219,11 +229,12 @@ const ApplicationPrintView: React.FC = () => {
             font-size: 8pt;
             font-weight: bold;
             color: #4A5568;
+            margin-bottom: 1px; /* Added */
           }
           
           .print-value {
             font-size: 9pt;
-            margin-top: 1px;
+            margin-top: 2px; /* Changed */
           }
           
           .print-address-grid {
@@ -343,21 +354,31 @@ const ApplicationPrintView: React.FC = () => {
 
           <div className="print-photo">
             {application.image_url ? (
-              <img 
-                src={application.image_url} 
-                alt={application.name}
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                  if (target.nextSibling) {
-                    (target.nextSibling as HTMLElement).style.display = 'block';
-                  }
-                }}
-              />
-            ) : null}
-            <div style={{ display: application.image_url ? 'none' : 'block', fontSize: '8pt', textAlign: 'center' }}>
-              {application.image_url ? 'Photo Available' : 'No Photo'}
-            </div>
+              <>
+                <img
+                  src={application.image_url}
+                  alt={application.name || 'Applicant photo'}
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none'; // Hide the broken image
+                    // Get the placeholder div (assumed to be the next sibling)
+                    const placeholder = target.nextElementSibling as HTMLElement;
+                    if (placeholder) {
+                      placeholder.style.display = 'block';
+                      placeholder.textContent = 'Photo not loadable. Please affix manually.';
+                    }
+                  }}
+                />
+                {/* This div is initially hidden and only shown on image error */}
+                <div className="print-photo-placeholder-text" style={{ display: 'none' }}>
+                  {/* Placeholder text will be set by onError */}
+                </div>
+              </>
+            ) : (
+              <div className="print-photo-placeholder-text">
+                No Photo Provided
+              </div>
+            )}
           </div>
         </div>
 
