@@ -14,38 +14,20 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    marginBottom: 15,
+    marginBottom: 15, // Changed from 20
     alignItems: 'center',
-    borderBottomWidth: 3,
-    borderBottomColor: '#1e40af',
+    borderBottomWidth: 2,
+    borderBottomColor: '#2D3748',
     paddingBottom: 10,
-    backgroundColor: '#eff6ff',
-    padding: 15,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-    borderLeftWidth: 4,
-    borderRightWidth: 4,
-    borderTopWidth: 4,
-    borderLeftColor: '#fbbf24',
-    borderRightColor: '#fbbf24',
-    borderTopColor: '#fbbf24',
   },
   logo: {
     width: 50,
     height: 50,
     marginRight: 10,
-    borderRadius: 25,
-    border: '3px solid #1e40af',
-  },
-  logoFallback: {
-    width: 50,
-    height: 50,
-    marginRight: 10,
-    border: '3px solid #1e40af',
+    border: '2px solid #2D3748',
     borderRadius: 25,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#dbeafe',
   },
   headerText: {
     flex: 1,
@@ -54,29 +36,26 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#1e40af',
+    color: '#2D3748',
     marginBottom: 3,
   },
   subtitle: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: '#dc2626',
+    color: '#2D3748',
     marginBottom: 2,
   },
   contactInfo: {
     fontSize: 8,
-    color: '#059669',
+    color: '#4A5568',
     marginBottom: 1,
-    fontWeight: 'bold',
   },
   photoContainer: {
     width: 70,
     height: 90,
-    border: '2px solid #1e40af',
+    border: '1px solid #000',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f8fafc',
-    borderRadius: 5,
   },
   photo: {
     width: 65,
@@ -92,16 +71,6 @@ const styles = StyleSheet.create({
   },
   mainContent: {
     flexDirection: 'row',
-    backgroundColor: '#fefefe',
-    borderLeftWidth: 2,
-    borderRightWidth: 2,
-    borderBottomWidth: 2,
-    borderLeftColor: '#fbbf24',
-    borderRightColor: '#fbbf24',
-    borderBottomColor: '#1e40af',
-    padding: 10,
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
   },
   leftColumn: {
     flex: 2,
@@ -110,24 +79,18 @@ const styles = StyleSheet.create({
   rightColumn: {
     flex: 1,
     paddingLeft: 10,
-    backgroundColor: '#f0f9ff',
-    padding: 8,
-    borderRadius: 5,
-    borderLeftWidth: 2,
-    borderLeftColor: '#0ea5e9',
   },
   sectionTitle: {
     fontSize: 11,
     fontWeight: 'bold',
-    marginBottom: 6,
+    marginBottom: 6, // Changed from 8
     marginTop: 10,
-    padding: 6,
-    textAlign: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#1e40af',
-    color: '#ffffff',
-    backgroundColor: '#1e40af',
-    borderRadius: 3,
+    // backgroundColor: '#f8f9fa', // Removed
+    padding: 4, // Changed from 3, assuming all sides
+    textAlign: 'left', // Changed from 'center'
+    borderBottomWidth: 0.5, // Added
+    borderBottomColor: '#AEAEAE', // Added
+    color: '#1A202C', // Added
   },
   row: {
     flexDirection: 'row',
@@ -145,16 +108,13 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 8,
     fontWeight: 'bold',
-    color: '#374151',
-    marginBottom: 1,
+    color: '#4A5568',
+    marginBottom: 1, // Added
   },
   value: {
     fontSize: 9,
-    color: '#111827',
-    marginTop: 2,
-    backgroundColor: '#f9fafb',
-    padding: 2,
-    borderRadius: 2,
+    color: '#2D3748',
+    marginTop: 2, // Changed from 1
   },
   addressGrid: {
     flexDirection: 'row',
@@ -199,35 +159,26 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   medicalBox: {
-    border: '1px solid #dc2626',
+    border: '1px solid #000',
     padding: 5,
     minHeight: 25,
     marginTop: 5,
-    backgroundColor: '#fef2f2',
-    borderRadius: 3,
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 20,
-    paddingTop: 15,
-    borderTopWidth: 2,
-    borderTopColor: '#1e40af',
-    backgroundColor: '#eff6ff',
-    padding: 10,
-    borderRadius: 5,
+    marginTop: 20, // Changed from 15
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#E2E8F0',
   },
   signatureBox: {
     width: '45%',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
-    padding: 8,
-    borderRadius: 5,
-    border: '1px solid #d1d5db',
   },
   signatureLine: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#1e40af',
+    borderBottomWidth: 1,
+    borderBottomColor: '#000',
     width: '100%',
     marginTop: 15,
   },
@@ -238,6 +189,8 @@ interface ApplicationPDFProps {
 }
 
 const ApplicationPDF: React.FC<ApplicationPDFProps> = ({ application }) => {
+  const FALLBACK_IMAGE_URL = "https://via.placeholder.com/65x85.png?text=N/A";
+
   const formatCategory = (category: string) => {
     switch (category) {
       case 'u-11': return 'Under-11';
@@ -252,41 +205,26 @@ const ApplicationPDF: React.FC<ApplicationPDFProps> = ({ application }) => {
   // Helper function to render photo with better error handling
   const renderPhoto = () => {
     if (!application.image_url) {
-      return <Text style={styles.noPhoto}>No Photo</Text>;
+      return <Image style={styles.photo} src={FALLBACK_IMAGE_URL} />;
     }
 
     try {
-      // Check if it's a valid URL and not a problematic domain
-      const url = new URL(application.image_url);
+      // Check if it's a valid URL
+      const url = new URL(application.image_url); // This line can throw if image_url is not a valid URL format
       
       // Blogger/Google images often have CORS issues, show fallback
       if (url.hostname.includes('blogger.googleusercontent.com') || 
           url.hostname.includes('blogspot.com') ||
           url.hostname.includes('googleapis.com')) {
-        return (
-          <Text style={styles.noPhoto}>
-            Photo not loadable due to restrictions. Please affix manually.
-          </Text>
-        );
+        return <Image style={styles.photo} src={FALLBACK_IMAGE_URL} />;
       }
 
       // Try to render the image for other domains
       return <Image style={styles.photo} src={application.image_url} />;
     } catch (error) {
-      return <Text style={styles.noPhoto}>Invalid Photo URL</Text>;
-    }
-  };
-
-  // Helper function to render logo
-  const renderLogo = () => {
-    try {
-      return <Image style={styles.logo} src="/bafcc-logo.png" />;
-    } catch (error) {
-      return (
-        <View style={styles.logoFallback}>
-          <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#1e40af' }}>BAFCC</Text>
-        </View>
-      );
+      // This catch block will handle errors from `new URL()` or potential future issues
+      // with <Image /> if it were to throw on invalid src prop (though it usually doesn't directly).
+      return <Image style={styles.photo} src={FALLBACK_IMAGE_URL} />;
     }
   };
 
@@ -295,7 +233,9 @@ const ApplicationPDF: React.FC<ApplicationPDFProps> = ({ application }) => {
       <Page size="A4" style={styles.page}>
         {/* Clean Header - NO Registration Number */}
         <View style={styles.header}>
-          {renderLogo()}
+          <View style={styles.logo}>
+            <Text style={{ fontSize: 8, fontWeight: 'bold' }}>BAFCC</Text>
+          </View>
           
           <View style={styles.headerText}>
             <Text style={styles.title}>BANDHGORA ANCHAL FOOTBALL COACHING CAMP</Text>
