@@ -118,8 +118,22 @@ const AdminDashboard: React.FC = () => {
       <div className="bg-gradient-to-r from-blue-700 to-blue-900 text-white px-6 py-4 shadow-lg">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 bg-white rounded-full flex items-center justify-center">
-              <span className="text-blue-700 font-bold text-sm">BAFC</span>
+            <div className="h-10 w-10 bg-white rounded-full flex items-center justify-center border-2 border-blue-300">
+              <img 
+                src="/bafcc-logo.png" 
+                alt="BAFCC Logo" 
+                className="h-8 w-8 object-contain"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  const fallback = target.nextElementSibling as HTMLElement;
+                  if (fallback) {
+                    fallback.style.display = 'flex';
+                    fallback.textContent = 'BAFC';
+                  }
+                }}
+              />
+              <span className="text-blue-700 font-bold text-sm" style={{ display: 'none' }}>BAFC</span>
             </div>
             <h1 className="text-xl md:text-2xl font-bold">BAFCC Admin Dashboard</h1>
           </div>

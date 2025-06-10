@@ -7,9 +7,9 @@ const Header: React.FC = () => {
         <div className="flex items-center mb-4 md:mb-0">
           <div className="bg-white rounded-full p-2 mr-4">
             <img 
-              src="/football-logo.svg"
+              src="/bafcc-logo.png" 
               alt="BAFCC Logo" 
-              className="h-16 w-16"
+              className="h-16 w-16 object-contain"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.src = "https://via.placeholder.com/64?text=BAFCC";
@@ -26,7 +26,7 @@ const Header: React.FC = () => {
             <span className="mr-2">📍</span> BANDHGORA, JHARGRAM,721514
           </p>
           <p className="flex items-center">
-            <span className="mr-2">📧</span> bandhgoraanchalfc2025@gmail.com
+            <span className="mr-2">📧</span> bandhgoraanchalfcc2025@gmail.com
           </p>
         </div>
       </div>
