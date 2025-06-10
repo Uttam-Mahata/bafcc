@@ -109,15 +109,21 @@ const ApplicationPrintView: React.FC = () => {
           .print-header {
             display: flex;
             align-items: center;
-            border-bottom: 2px solid #2D3748;
-            padding-bottom: 8px;
+            border-bottom: 3px solid #1e40af;
+            padding: 15px;
             margin-bottom: 15px;
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            border-left: 4px solid #fbbf24;
+            border-right: 4px solid #fbbf24;
+            border-top: 4px solid #fbbf24;
           }
           
           .print-logo {
             width: 50px;
             height: 50px;
-            border: 2px solid #2D3748;
+            border: 3px solid #1e40af;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -125,6 +131,8 @@ const ApplicationPrintView: React.FC = () => {
             margin-right: 10px;
             font-weight: bold;
             font-size: 8pt;
+            background: #dbeafe;
+            color: #1e40af;
           }
           
           .print-header-text {
@@ -136,29 +144,34 @@ const ApplicationPrintView: React.FC = () => {
             font-size: 14pt;
             font-weight: bold;
             margin-bottom: 3px;
+            color: #1e40af;
           }
           
           .print-subtitle {
             font-size: 12pt;
             font-weight: bold;
             margin-bottom: 2px;
+            color: #dc2626;
           }
           
           .print-contact {
             font-size: 8pt;
-            color: #4A5568;
+            color: #059669;
             margin-bottom: 1px;
+            font-weight: bold;
           }
           
           .print-photo {
             width: 70px;
             height: 90px;
-            border: 1px solid #000;
+            border: 2px solid #1e40af;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-left: 10px;
-            overflow: hidden; /* Added */
+            overflow: hidden;
+            background: #f8fafc;
+            border-radius: 5px;
           }
           
           .print-photo img {
@@ -174,21 +187,16 @@ const ApplicationPrintView: React.FC = () => {
             padding: 5px;
           }
           
-          .print-reg-number {
-            font-size: 10pt;
-            font-weight: bold;
-            padding: 5px;
-            border: 1px solid #000;
-            background: #f8f9fa;
-            text-align: center;
-            margin-top: 5px;
-            margin-left: 10px;
-            width: 70px;
-          }
-          
           .print-main {
             display: flex;
             gap: 10px;
+            background: #fefefe;
+            border-left: 2px solid #fbbf24;
+            border-right: 2px solid #fbbf24;
+            border-bottom: 2px solid #1e40af;
+            padding: 10px;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
           }
           
           .print-left {
@@ -197,17 +205,22 @@ const ApplicationPrintView: React.FC = () => {
           
           .print-right {
             flex: 1;
+            background: #f0f9ff;
+            padding: 8px;
+            border-radius: 5px;
+            border-left: 2px solid #0ea5e9;
           }
           
           .print-section {
             font-size: 11pt;
             font-weight: bold;
-            margin: 10px 0 6px 0; /* Changed */
-            /* background: #f8f9fa; */ /* Removed */
-            padding: 4px; /* Changed */
-            text-align: left; /* Changed */
-            border-bottom: 0.5px solid #AEAEAE; /* Added */
-            color: #1A202C; /* Added */
+            margin: 10px 0 6px 0;
+            padding: 6px;
+            text-align: center;
+            border-bottom: 1px solid #1e40af;
+            color: #ffffff;
+            background: #1e40af;
+            border-radius: 3px;
           }
           
           .print-row {
@@ -228,13 +241,17 @@ const ApplicationPrintView: React.FC = () => {
           .print-label {
             font-size: 8pt;
             font-weight: bold;
-            color: #4A5568;
-            margin-bottom: 1px; /* Added */
+            color: #374151;
+            margin-bottom: 1px;
           }
           
           .print-value {
             font-size: 9pt;
-            margin-top: 2px; /* Changed */
+            margin-top: 2px;
+            background: #f9fafb;
+            padding: 2px;
+            border-radius: 2px;
+            color: #111827;
           }
           
           .print-address-grid {
@@ -248,58 +265,36 @@ const ApplicationPrintView: React.FC = () => {
             padding-right: 5px;
           }
           
-          .print-position-row {
-            display: flex;
-            align-items: center;
-            margin-bottom: 3px;
-          }
-          
-          .print-checkbox {
-            width: 12px;
-            height: 12px;
-            border: 1px solid #000;
-            margin-right: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: white;
-          }
-          
-          .print-checkbox-checked {
-            width: 12px;
-            height: 12px;
-            border: 1px solid #000;
-            margin-right: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #000;
-            color: white;
-            font-weight: bold;
-          }
-          
           .print-medical-box {
-            border: 1px solid #000;
+            border: 1px solid #dc2626;
             padding: 5px;
             min-height: 25px;
             margin-top: 5px;
+            background: #fef2f2;
+            border-radius: 3px;
           }
           
           .print-footer {
             display: flex;
             justify-content: space-between;
-            margin-top: 15px;
-            padding-top: 10px;
-            border-top: 1px solid #E2E8F0;
+            margin-top: 20px;
+            padding: 15px 10px 10px 10px;
+            border-top: 2px solid #1e40af;
+            background: #eff6ff;
+            border-radius: 5px;
           }
           
           .print-signature {
             width: 45%;
             text-align: center;
+            background: #ffffff;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #d1d5db;
           }
           
           .print-signature-line {
-            border-bottom: 1px solid #000;
+            border-bottom: 2px solid #1e40af;
             width: 100%;
             margin-top: 15px;
           }
@@ -342,7 +337,22 @@ const ApplicationPrintView: React.FC = () => {
         {/* Header */}
         <div className="print-header">
           <div className="print-logo">
-            BAFCC
+            <img
+              src="/bafcc-logo.png"
+              alt="BAFCC Logo"
+              style={{ width: '46px', height: '46px', objectFit: 'contain' }}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const fallback = target.nextElementSibling as HTMLElement;
+                if (fallback) {
+                  fallback.style.display = 'flex';
+                }
+              }}
+            />
+            <div style={{ display: 'none', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+              BAFCC
+            </div>
           </div>
           
           <div className="print-header-text">
@@ -565,7 +575,7 @@ const ApplicationPrintView: React.FC = () => {
         </div>
 
         {/* Footer - Signatures */}
-        {/* <div className="print-footer">
+        <div className="print-footer">
           <div className="print-signature">
             <div className="print-label">Applicant's Signature</div>
             <div className="print-signature-line"></div>
@@ -574,10 +584,10 @@ const ApplicationPrintView: React.FC = () => {
             <div className="print-label">Guardian's Signature</div>
             <div className="print-signature-line"></div>
           </div>
-        </div> */}
+        </div>
       </div>
     </>
   );
 };
 
-export default ApplicationPrintView; 
+export default ApplicationPrintView;
