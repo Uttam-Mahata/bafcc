@@ -118,8 +118,22 @@ const AdminDashboard: React.FC = () => {
       <div className="bg-gradient-to-r from-blue-700 to-blue-900 text-white px-6 py-4 shadow-lg">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 bg-white rounded-full flex items-center justify-center">
-              <span className="text-blue-700 font-bold text-sm">BAFC</span>
+            <div className="h-10 w-10 bg-white rounded-full flex items-center justify-center border-2 border-blue-300">
+              <img 
+                src="/bafcc-logo.png" 
+                alt="BAFCC Logo" 
+                className="h-8 w-8 object-contain"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  const fallback = target.nextElementSibling as HTMLElement;
+                  if (fallback) {
+                    fallback.style.display = 'flex';
+                    fallback.textContent = 'BAFC';
+                  }
+                }}
+              />
+              <span className="text-blue-700 font-bold text-sm" style={{ display: 'none' }}>BAFC</span>
             </div>
             <h1 className="text-xl md:text-2xl font-bold">BAFCC Admin Dashboard</h1>
           </div>
@@ -218,7 +232,13 @@ const AdminDashboard: React.FC = () => {
                           Applicant
                         </th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Date of Birth
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Category
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Village
                         </th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Contact
@@ -259,10 +279,16 @@ const AdminDashboard: React.FC = () => {
                               </div>
                             </div>
                           </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {app.dob}
+                          </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                               {app.category.toUpperCase()}
                             </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {app.address?.village || 'N/A'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {app.mobile_number}
@@ -313,4 +339,4 @@ const AdminDashboard: React.FC = () => {
   );
 };
 
-export default AdminDashboard; 
+export default AdminDashboard;
