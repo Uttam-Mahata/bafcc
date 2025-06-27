@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { pdf } from '@react-pdf/renderer';
-// @ts-ignore
 import { saveAs } from 'file-saver';
 import { ApplicationService, type Application } from '../../services/ApplicationService';
 import ApplicationPDF from './ApplicationPDF';
@@ -87,19 +86,43 @@ const ApplicationView: React.FC = () => {
   };
 
   const handleDownloadPDF = async () => {
-    if (!application) return;
+    if (!application || !id) return;
     
     setGeneratingPDF(true);
     try {
-      const doc = <ApplicationPDF application={application} />;
-      const blob = await pdf(doc).toBlob();
+      // Get application with processed images from backend
+      const applicationWithImages = await ApplicationService.getInstance().getApplicationWithImages(parseInt(id));
+      
+      // Generate PDF using React PDF
+      const pdfDoc = <ApplicationPDF 
+        application={applicationWithImages.application} 
+        images={applicationWithImages.images}
+      />;
+      
+      const pdfBlob = await pdf(pdfDoc).toBlob();
       const filename = `BAFCC_Application_${application.registration_number.replace(/[\/\\]/g, '_')}.pdf`;
-      saveAs(blob, filename);
+      saveAs(pdfBlob, filename);
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Error generating PDF. Please try again.');
     } finally {
       setGeneratingPDF(false);
+    }
+  };
+
+  const formatCategory = (category: string) => {
+    switch (category) {
+      case 'u-11': return 'Under-11 Boys';
+      case 'u-13': return 'Under-13 Boys';
+      case 'u-15': return 'Under-15 Boys';
+      case 'u-17': return 'Under-17 Boys';
+      case 'open': return 'Open Boys';
+      case 'gu-11': return 'Under-11 Girls';
+      case 'gu-13': return 'Under-13 Girls';
+      case 'gu-15': return 'Under-15 Girls';
+      case 'gu-17': return 'Under-17 Girls';
+      case 'gopen': return 'Open Girls';
+      default: return category.toUpperCase();
     }
   };
 
@@ -225,7 +248,7 @@ const ApplicationView: React.FC = () => {
               <div className="mt-4 bg-blue-50 p-3 rounded-lg border border-blue-100 w-full">
                 <div className="text-center">
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    {application.category.toUpperCase()}
+                    {formatCategory(application.category)}
                   </span>
                 </div>
               </div>

@@ -25,6 +25,7 @@ const AdminDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [downloadingPDFs, setDownloadingPDFs] = useState<Set<string>>(new Set()); // Track downloading state
   const { logout, user } = useAuth();
   const navigate = useNavigate();
 
@@ -100,15 +101,53 @@ const AdminDashboard: React.FC = () => {
   };
 
   const handleDownloadPDF = async (id: string) => {
+    const applicationId = parseInt(id);
+    const application = applications.find(app => app.id === applicationId);
+    
+    if (!application) return;
+
+    // Add to downloading set
+    setDownloadingPDFs(prev => new Set(prev).add(id));
+
     try {
-      const application = applications.find(app => app.id === parseInt(id));
-      if (application) {
-        const pdfDoc = await pdf(<ApplicationPDF application={application} />);
-        const pdfBlob = await pdfDoc.toBlob();
-        saveAs(pdfBlob, `${application.name}_application.pdf`);
-      }
+      // Get application with processed images from backend
+      const applicationWithImages = await ApplicationService.getInstance().getApplicationWithImages(applicationId);
+      
+      // Generate PDF using React PDF
+      const pdfDoc = <ApplicationPDF 
+        application={applicationWithImages.application} 
+        images={applicationWithImages.images}
+      />;
+      
+      const pdfBlob = await pdf(pdfDoc).toBlob();
+      const filename = `BAFCC_Application_${application.registration_number.replace(/[\/\\]/g, '_')}.pdf`;
+      saveAs(pdfBlob, filename);
     } catch (error) {
       console.error('Error downloading PDF:', error);
+      alert('Error downloading PDF. Please try again.');
+    } finally {
+      // Remove from downloading set
+      setDownloadingPDFs(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
+    }
+  };
+
+  const formatCategory = (category: string) => {
+    switch (category) {
+      case 'u-11': return 'Under-11 Boys';
+      case 'u-13': return 'Under-13 Boys';
+      case 'u-15': return 'Under-15 Boys';
+      case 'u-17': return 'Under-17 Boys';
+      case 'open': return 'Open Boys';
+      case 'gu-11': return 'Under-11 Girls';
+      case 'gu-13': return 'Under-13 Girls';
+      case 'gu-15': return 'Under-15 Girls';
+      case 'gu-17': return 'Under-17 Girls';
+      case 'gopen': return 'Open Girls';
+      default: return category.toUpperCase();
     }
   };
 
@@ -187,11 +226,20 @@ const AdminDashboard: React.FC = () => {
                   className="pl-10 w-full md:w-48 py-2 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 appearance-none bg-white"
                 >
                   <option value="all">All Categories</option>
-                  <option value="u-11">Under-11</option>
-                  <option value="u-13">Under-13</option>
-                  <option value="u-15">Under-15</option>
-                  <option value="u-17">Under-17</option>
-                  <option value="open">Open</option>
+                  <optgroup label="Boys Categories">
+                    <option value="u-11">Under-11 Boys</option>
+                    <option value="u-13">Under-13 Boys</option>
+                    <option value="u-15">Under-15 Boys</option>
+                    <option value="u-17">Under-17 Boys</option>
+                    <option value="open">Open Boys</option>
+                  </optgroup>
+                  <optgroup label="Girls Categories">
+                    <option value="gu-11">Under-11 Girls</option>
+                    <option value="gu-13">Under-13 Girls</option>
+                    <option value="gu-15">Under-15 Girls</option>
+                    <option value="gu-17">Under-17 Girls</option>
+                    <option value="gopen">Open Girls</option>
+                  </optgroup>
                 </select>
               </div>
               
@@ -284,7 +332,7 @@ const AdminDashboard: React.FC = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                              {app.category.toUpperCase()}
+                              {formatCategory(app.category)}
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -293,29 +341,41 @@ const AdminDashboard: React.FC = () => {
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {app.mobile_number}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div className="flex items-center space-x-2">
-                              <button
-                                onClick={() => handleViewDetails(app.id?.toString() || '')}
-                                className="flex items-center justify-center bg-blue-50 hover:bg-blue-100 text-blue-600 p-2 rounded-lg transition duration-150"
-                                title="View Details"
-                              >
-                                <Eye size={16} />
-                              </button>
-                              <button
-                                onClick={() => handleEdit(app.id?.toString() || '')}
-                                className="flex items-center justify-center bg-indigo-50 hover:bg-indigo-100 text-indigo-600 p-2 rounded-lg transition duration-150"
-                                title="Edit"
-                              >
-                                <Edit2 size={16} />
-                              </button>
-                              <button
-                                onClick={() => handleDownloadPDF(app.id?.toString() || '')}
-                                className="flex items-center justify-center bg-green-50 hover:bg-green-100 text-green-600 p-2 rounded-lg transition duration-150"
-                                title="Download PDF"
-                              >
-                                <Download size={16} />
-                              </button>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => handleViewDetails(app.id?.toString() || '')}
+            className="flex items-center justify-center bg-blue-50 hover:bg-blue-100 text-blue-600 p-2 rounded-lg transition duration-150"
+            title="View Details"
+          >
+            <Eye size={16} />
+          </button>
+          <button
+            onClick={() => handleEdit(app.id?.toString() || '')}
+            className="flex items-center justify-center bg-indigo-50 hover:bg-indigo-100 text-indigo-600 p-2 rounded-lg transition duration-150"
+            title="Edit"
+          >
+            <Edit2 size={16} />
+          </button>
+          <button
+            onClick={() => handleDownloadPDF(app.id?.toString() || '')}
+            disabled={downloadingPDFs.has(app.id?.toString() || '')}
+            className={`flex items-center justify-center p-2 rounded-lg transition duration-150 ${
+              downloadingPDFs.has(app.id?.toString() || '')
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-green-50 hover:bg-green-100 text-green-600'
+            }`}
+            title={downloadingPDFs.has(app.id?.toString() || '') ? "Generating PDF..." : "Download PDF"}
+          >
+            {downloadingPDFs.has(app.id?.toString() || '') ? (
+              <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            ) : (
+              <Download size={16} />
+            )}
+          </button>
                               <button
                                 onClick={() => handleDelete(app.id?.toString() || '')}
                                 className="flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-lg transition duration-150"

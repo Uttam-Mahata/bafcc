@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://bafcc-server.onrender.com';
-// const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+//const API_URL = import.meta.env.VITE_API_URL || 'https://bafcc-server.onrender.com';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export interface Address {
     village: string;
@@ -68,6 +68,14 @@ export interface ApplicationsResponse {
     pages: number;
 }
 
+export interface ApplicationWithImages {
+    application: Application;
+    images: {
+        logo: string | null;
+        photo: string | null;
+    };
+}
+
 export class ApplicationService {
     private static instance: ApplicationService;
 
@@ -103,4 +111,14 @@ export class ApplicationService {
     async deleteApplication(id: number): Promise<void> {
         await axios.delete(`${API_URL}/api/v1/applications/${id}`);
     }
-} 
+
+    async getApplicationWithImages(id: number): Promise<ApplicationWithImages> {
+        const token = localStorage.getItem('access_token');
+        const response = await axios.get<ApplicationWithImages>(`${API_URL}/api/v1/applications/${id}/pdf-images`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    }
+}

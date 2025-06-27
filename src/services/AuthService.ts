@@ -1,7 +1,7 @@
 import axios, { AxiosError } from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://bafcc-server.onrender.com';
-// const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+//const API_URL = import.meta.env.VITE_API_URL || 'https://bafcc-server.onrender.com';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export interface LoginResponse {
   access_token: string;

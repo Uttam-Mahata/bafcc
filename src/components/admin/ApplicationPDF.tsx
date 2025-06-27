@@ -2,8 +2,7 @@ import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 import type { Application } from '../../services/ApplicationService';
 
-// Updated: Registration number moved to Personal Information section - NO header registration
-// Create styles for the PDF
+// Enhanced styles with better colors and layout
 const styles = StyleSheet.create({
   page: {
     flexDirection: 'column',
@@ -31,18 +30,17 @@ const styles = StyleSheet.create({
     borderTopColor: '#fbbf24',
   },
   logo: {
-    width: 50,
-    height: 50,
-    marginRight: 10,
-    borderRadius: 25,
-    border: '3px solid #1e40af',
+    width: 60,
+    height: 60,
+    marginRight: 15,
+    borderRadius: 30,
   },
   logoFallback: {
-    width: 50,
-    height: 50,
-    marginRight: 10,
+    width: 60,
+    height: 60,
+    marginRight: 15,
     border: '3px solid #1e40af',
-    borderRadius: 25,
+    borderRadius: 30,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#dbeafe',
@@ -52,16 +50,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#1e40af',
-    marginBottom: 3,
+    marginBottom: 4,
+    letterSpacing: 0.5,
   },
   subtitle: {
     fontSize: 12,
     fontWeight: 'bold',
     color: '#dc2626',
-    marginBottom: 2,
+    marginBottom: 3,
   },
   contactInfo: {
     fontSize: 8,
@@ -72,15 +71,20 @@ const styles = StyleSheet.create({
   photoContainer: {
     width: 70,
     height: 90,
-    border: '2px solid #1e40af',
+    border: '3px solid #1e40af',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#f8fafc',
-    borderRadius: 5,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   photo: {
-    width: 65,
-    height: 85,
+    width: 64,
+    height: 84,
+    borderRadius: 4,
   },
   noPhoto: {
     fontSize: 8,
@@ -119,15 +123,33 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 11,
     fontWeight: 'bold',
-    marginBottom: 6,
-    marginTop: 10,
-    padding: 6,
+    marginBottom: 8,
+    marginTop: 12,
+    padding: 8,
     textAlign: 'center',
-    borderBottomWidth: 1,
+    borderBottomWidth: 2,
     borderBottomColor: '#1e40af',
     color: '#ffffff',
     backgroundColor: '#1e40af',
-    borderRadius: 3,
+    borderRadius: 6,
+    shadowColor: '#1e40af',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  registrationHighlight: {
+    backgroundColor: '#dbeafe',
+    border: '2px solid #1e40af',
+    borderRadius: 8,
+    padding: 8,
+    marginBottom: 10,
+    alignItems: 'center',
+  },
+  registrationNumber: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#1e40af',
+    letterSpacing: 1,
   },
   row: {
     flexDirection: 'row',
@@ -235,65 +257,53 @@ const styles = StyleSheet.create({
 
 interface ApplicationPDFProps {
   application: Application;
+  images: {
+    logo: string | null;
+    photo: string | null;
+  };
 }
 
-const ApplicationPDF: React.FC<ApplicationPDFProps> = ({ application }) => {
+const ApplicationPDF: React.FC<ApplicationPDFProps> = ({ application, images }) => {
   const formatCategory = (category: string) => {
     switch (category) {
-      case 'u-11': return 'Under-11';
-      case 'u-13': return 'Under-13';
-      case 'u-15': return 'Under-15';
-      case 'u-17': return 'Under-17';
-      case 'open': return 'Open';
+      case 'u-11': return 'Under-11 Boys';
+      case 'u-13': return 'Under-13 Boys';
+      case 'u-15': return 'Under-15 Boys';
+      case 'u-17': return 'Under-17 Boys';
+      case 'open': return 'Open Boys';
+      case 'gu-11': return 'Under-11 Girls';
+      case 'gu-13': return 'Under-13 Girls';
+      case 'gu-15': return 'Under-15 Girls';
+      case 'gu-17': return 'Under-17 Girls';
+      case 'gopen': return 'Open Girls';
       default: return category;
     }
   };
 
-  // Helper function to render photo with better error handling
+  // Enhanced photo rendering with processed images
   const renderPhoto = () => {
-    if (!application.image_url) {
-      return <Text style={styles.noPhoto}>No Photo</Text>;
+    if (images.photo) {
+      return <Image style={styles.photo} src={images.photo} />;
     }
-
-    try {
-      // Check if it's a valid URL and not a problematic domain
-      const url = new URL(application.image_url);
-      
-      // Blogger/Google images often have CORS issues, show fallback
-      if (url.hostname.includes('blogger.googleusercontent.com') || 
-          url.hostname.includes('blogspot.com') ||
-          url.hostname.includes('googleapis.com')) {
-        return (
-          <Text style={styles.noPhoto}>
-            Photo not loadable due to restrictions. Please affix manually.
-          </Text>
-        );
-      }
-
-      // Try to render the image for other domains
-      return <Image style={styles.photo} src={application.image_url} />;
-    } catch (error) {
-      return <Text style={styles.noPhoto}>Invalid Photo URL</Text>;
-    }
+    return <Text style={styles.noPhoto}>No Photo Available</Text>;
   };
 
-  // Helper function to render logo
+  // Enhanced logo rendering with processed images
   const renderLogo = () => {
-    try {
-      return <Image style={styles.logo} src="/bafcc-logo.png" />;
-    } catch (error) {
-      return (
-        <View style={styles.logoFallback}>
-          <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#1e40af' }}>BAFCC</Text>
-        </View>
-      );
+    if (images.logo) {
+      return <Image style={styles.logo} src={images.logo} />;
     }
+    return (
+      <View style={styles.logoFallback}>
+        <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#1e40af' }}>BAFCC</Text>
+      </View>
+    );
   };
 
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        {/* Clean Header - NO Registration Number */}
+        {/* Enhanced Header */}
         <View style={styles.header}>
           {renderLogo()}
           
@@ -309,7 +319,14 @@ const ApplicationPDF: React.FC<ApplicationPDFProps> = ({ application }) => {
           </View>
         </View>
 
-        {/* Main Content */}
+        {/* Registration Number Highlight */}
+        <View style={styles.registrationHighlight}>
+          <Text style={styles.registrationNumber}>
+            Registration Number: {application.registration_number}
+          </Text>
+        </View>
+
+        {/* Main Content with enhanced styling */}
         <View style={styles.mainContent}>
           <View style={styles.leftColumn}>
             {/* Personal Information */}
@@ -491,7 +508,7 @@ const ApplicationPDF: React.FC<ApplicationPDFProps> = ({ application }) => {
           </View>
         </View>
 
-        {/* Footer - Signatures */}
+        {/* Enhanced Footer */}
         <View style={styles.footer}>
           <View style={styles.signatureBox}>
             <Text style={styles.label}>Applicant's Signature</Text>

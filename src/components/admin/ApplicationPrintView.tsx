@@ -53,11 +53,16 @@ const ApplicationPrintView: React.FC = () => {
 
   const formatCategory = (category: string) => {
     switch (category) {
-      case 'u-11': return 'Under-11';
-      case 'u-13': return 'Under-13';
-      case 'u-15': return 'Under-15';
-      case 'u-17': return 'Under-17';
-      case 'open': return 'Open';
+      case 'u-11': return 'Under-11 Boys';
+      case 'u-13': return 'Under-13 Boys';
+      case 'u-15': return 'Under-15 Boys';
+      case 'u-17': return 'Under-17 Boys';
+      case 'open': return 'Open Boys';
+      case 'gu-11': return 'Under-11 Girls';
+      case 'gu-13': return 'Under-13 Girls';
+      case 'gu-15': return 'Under-15 Girls';
+      case 'gu-17': return 'Under-17 Girls';
+      case 'gopen': return 'Open Girls';
       default: return category;
     }
   };
