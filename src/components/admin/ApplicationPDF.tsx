@@ -258,7 +258,6 @@ const styles = StyleSheet.create({
 interface ApplicationPDFProps {
   application: Application;
   images: {
-    logo: string | null;
     photo: string | null;
   };
 }
@@ -288,16 +287,9 @@ const ApplicationPDF: React.FC<ApplicationPDFProps> = ({ application, images }) 
     return <Text style={styles.noPhoto}>No Photo Available</Text>;
   };
 
-  // Enhanced logo rendering with processed images
+  // Enhanced logo rendering with static path
   const renderLogo = () => {
-    if (images.logo) {
-      return <Image style={styles.logo} src={images.logo} />;
-    }
-    return (
-      <View style={styles.logoFallback}>
-        <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#1e40af' }}>BAFCC</Text>
-      </View>
-    );
+    return <Image style={styles.logo} src="/bafcc-logo.png" />;
   };
 
   return (
