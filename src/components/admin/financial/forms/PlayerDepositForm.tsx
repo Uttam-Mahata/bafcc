@@ -28,7 +28,7 @@ const PlayerDepositForm: React.FC<PlayerDepositFormProps> = ({
           <option value="">Select Player</option>
           {playerNames.map((player) => (
             <option key={player.id} value={player.id}>
-              {player.name}
+              {player.name} ({player.registration_number})
             </option>
           ))}
         </select>
@@ -45,6 +45,7 @@ const PlayerDepositForm: React.FC<PlayerDepositFormProps> = ({
             className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             required
           >
+            <option value="">Select Month</option>
             {MONTHS.map((month) => (
               <option key={month} value={month}>
                 {month}
@@ -67,6 +68,18 @@ const PlayerDepositForm: React.FC<PlayerDepositFormProps> = ({
           />
         </div>
       </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Deposit Date
+        </label>
+        <input
+          type="date"
+          value={formData.deposit_date ? formData.deposit_date.split('T')[0] : ''}
+          onChange={(e) => onInputChange('deposit_date', e.target.value ? `${e.target.value}T00:00:00.000Z` : '')}
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        />
+      </div>
       
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -75,10 +88,10 @@ const PlayerDepositForm: React.FC<PlayerDepositFormProps> = ({
         <input
           type="number"
           step="0.01"
-          value={formData.amount || ''}
+          value={formData.amount || 50}
           onChange={(e) => onInputChange('amount', e.target.value)}
           className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          placeholder="0.00"
+          placeholder="50.00"
           required
         />
       </div>

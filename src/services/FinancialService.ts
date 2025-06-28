@@ -16,10 +16,12 @@ export interface PlayerDeposit {
   id: number;
   player_id: number;
   player_name?: string;
+  player_registration_number?: string;
   month: string;
   year: number;
   amount: number;
   description?: string;
+  deposit_date?: string;
   created_at: string;
   updated_at?: string;
 }
@@ -30,6 +32,7 @@ export interface PlayerDepositCreate {
   year: number;
   amount: number;
   description?: string;
+  deposit_date?: string;
 }
 
 export interface MemberDeposit {
@@ -108,6 +111,7 @@ export interface FinancialReport {
 export interface PlayerName {
   id: number;
   name: string;
+  registration_number: string;
 }
 
 export interface MemberName {
@@ -219,7 +223,8 @@ class FinancialService {
     size: number = 10,
     month?: string,
     year?: number,
-    playerId?: number
+    playerId?: number,
+    search?: string
   ): Promise<PaginatedResponse<PlayerDeposit>> {
     const params = new URLSearchParams({
       page: page.toString(),
@@ -227,6 +232,7 @@ class FinancialService {
       ...(month && { month }),
       ...(year && { year: year.toString() }),
       ...(playerId && { player_id: playerId.toString() }),
+      ...(search && { search }),
     });
     return this.makeRequest<PaginatedResponse<PlayerDeposit>>(`/api/v1/financials/player_deposits/?${params}`);
   }

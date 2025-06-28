@@ -18,7 +18,8 @@ export const getCurrentDateDefaults = () => {
   return {
     month: MONTHS[currentDate.getMonth()],
     year: currentDate.getFullYear(),
-    amount: '',
-    description: ''
+    amount: 50, // Default amount set to 50 rupees
+    description: '',
+    deposit_date: currentDate.toISOString().split('T')[0] + 'T00:00:00.000Z'
   };
 };

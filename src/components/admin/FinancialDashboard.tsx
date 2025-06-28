@@ -33,6 +33,14 @@ const FinancialDashboard: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState<string>(MONTHS[new Date().getMonth()]);
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   
+  // Player deposits filtering states
+  const [playerDepositFilters, setPlayerDepositFilters] = useState<{
+    month?: string;
+    year?: number;
+    playerId?: number;
+    search?: string;
+  }>({});
+  
   // Data states
   const [financialReport, setFinancialReport] = useState<FinancialReport | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
@@ -97,23 +105,23 @@ const FinancialDashboard: React.FC = () => {
     try {
       const [
         reportData,
-        playerDepositsData,
         memberDepositsData,
         donationsData,
         expensesData
       ] = await Promise.all([
         financialService.getFinancialReport(selectedMonth, selectedYear),
-        financialService.getPlayerDeposits(1, 100, selectedMonth, selectedYear),
         financialService.getMemberDeposits(1, 100, selectedMonth, selectedYear),
         financialService.getDonations(1, 100, selectedMonth, selectedYear),
         financialService.getExpenses(1, 100, selectedMonth, selectedYear)
       ]);
 
       setFinancialReport(reportData);
-      setPlayerDeposits(playerDepositsData.items || []);
       setMemberDeposits(memberDepositsData.items || []);
       setDonations(donationsData.items || []);
       setExpenses(expensesData.items || []);
+      
+      // Load player deposits separately to handle filtering
+      await loadPlayerDeposits();
     } catch (err) {
       console.error('Error loading financial data:', err);
       setError(err instanceof Error ? err.message : 'Failed to load financial data');
@@ -145,6 +153,37 @@ const FinancialDashboard: React.FC = () => {
     } catch (err) {
       console.error('Error loading member names:', err);
     }
+  };
+
+  const loadPlayerDeposits = async (filters?: {
+    month?: string;
+    year?: number;
+    playerId?: number;
+    search?: string;
+  }) => {
+    try {
+      const playerDepositsData = await financialService.getPlayerDeposits(
+        1, 
+        100, 
+        filters?.month || selectedMonth, 
+        filters?.year || selectedYear,
+        filters?.playerId,
+        filters?.search
+      );
+      setPlayerDeposits(playerDepositsData.items || []);
+    } catch (err) {
+      console.error('Error loading player deposits:', err);
+    }
+  };
+
+  const handlePlayerDepositFilterChange = (filters: {
+    month?: string;
+    year?: number;
+    playerId?: number;
+    search?: string;
+  }) => {
+    setPlayerDepositFilters(filters);
+    loadPlayerDeposits(filters);
   };
 
   // Modal handlers
@@ -226,6 +265,10 @@ const FinancialDashboard: React.FC = () => {
             onEdit={(deposit) => openModal('player-deposit', deposit)}
             onDelete={(id) => handleDelete('player-deposit', id)}
             formatCurrency={formatCurrency}
+            playerNames={playerNames}
+            selectedMonth={selectedMonth}
+            selectedYear={selectedYear}
+            onFilterChange={handlePlayerDepositFilterChange}
           />
         );
 
