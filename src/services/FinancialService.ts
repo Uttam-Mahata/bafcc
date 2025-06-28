@@ -129,6 +129,8 @@ class FinancialService {
 
   private constructor() {
     this.baseURL = import.meta.env.VITE_API_URL || 'https://bafcc-server.onrender.com';
+        // this.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
   }
 
   public static getInstance(): FinancialService {
@@ -162,7 +164,19 @@ class FinancialService {
       throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
     }
 
-    return response.json();
+    // Handle empty responses (like 204 No Content for DELETE requests)
+    if (response.status === 204 || response.headers.get('content-length') === '0') {
+      return undefined as T;
+    }
+
+    // Check if response has content before trying to parse JSON
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      return response.json();
+    }
+
+    // For non-JSON responses or empty responses, return undefined
+    return undefined as T;
   }
 
   // Member Management
