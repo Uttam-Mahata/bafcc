@@ -16,7 +16,8 @@ import {
   Trash2, 
   RefreshCw,
   ChevronDown,
-  User
+  User,
+  DollarSign
 } from 'lucide-react';
 
 const AdminDashboard: React.FC = () => {
@@ -181,6 +182,13 @@ const AdminDashboard: React.FC = () => {
               <User size={18} />
               <span>{user?.full_name || user?.username}</span>
             </div>
+            <button 
+              onClick={() => navigate('/admin/financial')}
+              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 transition duration-150 text-white py-2 px-3 rounded-lg shadow-sm"
+            >
+              <DollarSign size={16} />
+              <span className="hidden md:inline">Financials</span>
+            </button>
             <button 
               onClick={handleLogout} 
               className="flex items-center gap-1 bg-red-600 hover:bg-red-700 transition duration-150 text-white py-2 px-3 rounded-lg shadow-sm"

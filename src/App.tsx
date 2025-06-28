@@ -11,6 +11,7 @@ import 'react-toastify/dist/ReactToastify.css';
 const RegistrationForm = lazy(() => import('./components/RegistrationForm'));
 const AdminLogin = lazy(() => import('./components/admin/Login'));
 const AdminDashboard = lazy(() => import('./components/admin/Dashboard'));
+const FinancialDashboard = lazy(() => import('./components/admin/FinancialDashboard'));
 const ApplicationView = lazy(() => import('./components/admin/ApplicationView'));
 const ApplicationEdit = lazy(() => import('./components/admin/ApplicationEdit'));
 const ApplicationPrintView = lazy(() => import('./components/admin/ApplicationPrintView'));
@@ -81,6 +82,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <AdminDashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/financial" 
+                element={
+                  <ProtectedRoute>
+                    <FinancialDashboard />
                   </ProtectedRoute>
                 } 
               />
