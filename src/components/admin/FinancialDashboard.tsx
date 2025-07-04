@@ -34,7 +34,7 @@ const FinancialDashboard: React.FC = () => {
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   
   // Player deposits filtering states
-  const [playerDepositFilters, setPlayerDepositFilters] = useState<{
+  const [_playerDepositFilters, setPlayerDepositFilters] = useState<{
     month?: string;
     year?: number;
     playerId?: number;
