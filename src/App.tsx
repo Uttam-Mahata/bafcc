@@ -33,9 +33,19 @@ function App() {
         <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
           <Suspense fallback={<LoadingSpinner />}>
             <Routes>
-              {/* Protected Routes */}
+              {/* Root route redirecting to admin dashboard */}
               <Route 
                 path="/" 
+                element={
+                  <ProtectedRoute>
+                    <Navigate to="/admin/dashboard" replace />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Registration Form Route */}
+              <Route
+                path="/registration"
                 element={
                   <ProtectedRoute>
                     <div className="min-h-screen py-8 px-4">
@@ -72,6 +82,8 @@ function App() {
               
               {/* Login Route (Public) */}
               <Route path="/admin/login" element={<AdminLogin />} />
+
+              {/* Admin Dashboard Route */}
               <Route 
                 path="/admin/dashboard" 
                 element={
