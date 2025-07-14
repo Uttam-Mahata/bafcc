@@ -132,8 +132,7 @@ class FinancialService {
   private baseURL: string;
 
   private constructor() {
-    this.baseURL = import.meta.env.VITE_API_URL || 'https://bafcc-server.onrender.com';
-        // this.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    this.baseURL = import.meta.env.VITE_API_URL;
 
   }
 
