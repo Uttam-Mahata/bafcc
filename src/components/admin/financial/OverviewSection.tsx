@@ -7,15 +7,28 @@ interface OverviewSectionProps {
   financialReport: FinancialReport | null;
   memberNames: MemberName[];
   formatCurrency: (amount: number) => string;
+  period: 'monthly' | 'yearly' | 'all';
 }
 
 export const OverviewSection: React.FC<OverviewSectionProps> = ({
   financialReport,
   memberNames,
-  formatCurrency
+  formatCurrency,
+  period
 }) => {
+  // Helper to display period label
+  const getPeriodLabel = () => {
+    if (!financialReport) return '';
+    if (period === 'all') return 'All Time';
+    if (period === 'yearly') return `Year: ${financialReport.year || ''}`;
+    if (period === 'monthly') return `${financialReport.month || ''} ${financialReport.year || ''}`;
+    return '';
+  };
+
   return (
     <div className="space-y-6">
+      {/* Period Label */}
+      <div className="text-lg font-semibold text-blue-700 mb-2">{getPeriodLabel()}</div>
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard

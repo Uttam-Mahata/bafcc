@@ -132,8 +132,7 @@ class FinancialService {
   private baseURL: string;
 
   private constructor() {
-    this.baseURL = import.meta.env.VITE_API_URL || 'https://bafcc-server.onrender.com';
-        // this.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    this.baseURL = import.meta.env.VITE_API_URL;
 
   }
 
@@ -368,12 +367,11 @@ class FinancialService {
   }
 
   // Financial Report
-  async getFinancialReport(month: string, year: number): Promise<FinancialReport> {
-    const params = new URLSearchParams({
-      month,
-      year: year.toString(),
-    });
-    return this.makeRequest<FinancialReport>(`/api/v1/financials/report/?${params}`);
+  async getFinancialReport(month?: string, year?: number): Promise<FinancialReport> {
+    const params = new URLSearchParams();
+    if (month) params.append('month', month);
+    if (year) params.append('year', year.toString());
+    return this.makeRequest<FinancialReport>(`/api/v1/financials/report/?${params.toString()}`);
   }
 
   // Get player names for dropdowns
