@@ -130,7 +130,8 @@ const FinancialFormModal: React.FC<FinancialFormModalProps> = ({
           case 'expense':
             await financialService.createExpense({
               ...formData,
-              amount: parseFloat(formData.amount)
+              amount: parseFloat(formData.amount),
+              year: parseInt(formData.year, 10)
             } as ExpenseCreate);
             toast.success('Expense created successfully');
             break;
