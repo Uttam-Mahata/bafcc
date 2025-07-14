@@ -1,6 +1,9 @@
 import React from 'react';
 import { TrendingDown, Plus, Edit, Trash2 } from 'lucide-react';
 import type { Expense } from '../../../services/FinancialService';
+import { StatCard } from './StatCard';
+import { BarChart3 } from 'lucide-react';
+import { MONTHS } from './constants';
 
 interface ExpensesSectionProps {
   expenses: Expense[];
@@ -17,6 +20,28 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
   onDelete,
   formatCurrency
 }) => {
+  const [period, setPeriod] = React.useState<'monthly' | 'yearly' | 'all'>('monthly');
+  const [filterMonth, setFilterMonth] = React.useState(MONTHS[new Date().getMonth()]);
+  const [filterYear, setFilterYear] = React.useState(new Date().getFullYear());
+
+  // Summary stats
+  const totalAmount = expenses.reduce((sum, d) => sum + (d.amount || 0), 0);
+  const totalCount = expenses.length;
+
+  // Handle period change
+  const handlePeriodChange = (newPeriod: 'monthly' | 'yearly' | 'all') => {
+    setPeriod(newPeriod);
+    // TODO: Call parent onFilterChange if you want to fetch data from parent
+  };
+  const handleMonthFilter = (month: string) => {
+    setFilterMonth(month);
+    // TODO: Call parent onFilterChange if you want to fetch data from parent
+  };
+  const handleYearFilter = (year: number) => {
+    setFilterYear(year);
+    // TODO: Call parent onFilterChange if you want to fetch data from parent
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -31,6 +56,57 @@ export const ExpensesSection: React.FC<ExpensesSectionProps> = ({
           <Plus className="w-4 h-4" />
           Add Expense
         </button>
+      </div>
+
+      {/* Period Dropdown and Summary */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium text-gray-700">Period:</label>
+          <select
+            value={period}
+            onChange={e => handlePeriodChange(e.target.value as 'monthly' | 'yearly' | 'all')}
+            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="monthly">Monthly</option>
+            <option value="yearly">Yearly</option>
+            <option value="all">All Time</option>
+          </select>
+          {period === 'monthly' && (
+            <select
+              value={filterMonth}
+              onChange={e => handleMonthFilter(e.target.value)}
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              {MONTHS.map((month) => (
+                <option key={month} value={month}>{month}</option>
+              ))}
+            </select>
+          )}
+          {(period === 'monthly' || period === 'yearly') && (
+            <input
+              type="number"
+              value={filterYear}
+              onChange={e => handleYearFilter(parseInt(e.target.value))}
+              className="border border-gray-300 rounded-lg px-3 py-2 w-20 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              min="2020"
+              max="2030"
+            />
+          )}
+        </div>
+        <div className="flex gap-4 mt-4 md:mt-0">
+          <StatCard
+            title="Total Amount"
+            value={formatCurrency(totalAmount)}
+            icon={<BarChart3 className="w-5 h-5 text-white" />}
+            color="bg-red-500"
+          />
+          <StatCard
+            title="Total Expenses"
+            value={totalCount.toString()}
+            icon={<TrendingDown className="w-5 h-5 text-white" />}
+            color="bg-blue-500"
+          />
+        </div>
       </div>
 
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
