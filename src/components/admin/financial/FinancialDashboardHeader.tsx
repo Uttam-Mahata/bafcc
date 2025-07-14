@@ -6,6 +6,8 @@ import { MONTHS } from './types';
 interface FinancialDashboardHeaderProps {
   selectedMonth: string;
   selectedYear: number;
+  period: 'monthly' | 'yearly' | 'all';
+  onPeriodChange: (period: 'monthly' | 'yearly' | 'all') => void;
   onMonthChange: (month: string) => void;
   onYearChange: (year: number) => void;
   onRefresh: () => void;
@@ -14,6 +16,8 @@ interface FinancialDashboardHeaderProps {
 export const FinancialDashboardHeader: React.FC<FinancialDashboardHeaderProps> = ({
   selectedMonth,
   selectedYear,
+  period,
+  onPeriodChange,
   onMonthChange,
   onYearChange,
   onRefresh
@@ -40,29 +44,42 @@ export const FinancialDashboardHeader: React.FC<FinancialDashboardHeaderProps> =
           </div>
         </div>
 
-        {/* Month/Year Filter */}
+        {/* Period/Month/Year Filter */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <Calendar className="w-5 h-5 text-gray-500" />
             <select
-              value={selectedMonth}
-              onChange={(e) => onMonthChange(e.target.value)}
+              value={period}
+              onChange={e => onPeriodChange(e.target.value as 'monthly' | 'yearly' | 'all')}
               className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              {MONTHS.map((month) => (
-                <option key={month} value={month}>
-                  {month}
-                </option>
-              ))}
+              <option value="monthly">Monthly</option>
+              <option value="yearly">Yearly</option>
+              <option value="all">All Time</option>
             </select>
-            <input
-              type="number"
-              value={selectedYear}
-              onChange={(e) => onYearChange(parseInt(e.target.value))}
-              className="border border-gray-300 rounded-lg px-3 py-2 w-20 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              min="2020"
-              max="2030"
-            />
+            {period === 'monthly' && (
+              <select
+                value={selectedMonth}
+                onChange={(e) => onMonthChange(e.target.value)}
+                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                {MONTHS.map((month) => (
+                  <option key={month} value={month}>
+                    {month}
+                  </option>
+                ))}
+              </select>
+            )}
+            {(period === 'monthly' || period === 'yearly') && (
+              <input
+                type="number"
+                value={selectedYear}
+                onChange={(e) => onYearChange(parseInt(e.target.value))}
+                className="border border-gray-300 rounded-lg px-3 py-2 w-20 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                min="2020"
+                max="2030"
+              />
+            )}
           </div>
           <button
             onClick={onRefresh}

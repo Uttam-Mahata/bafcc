@@ -32,6 +32,7 @@ const FinancialDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('overview');
   const [selectedMonth, setSelectedMonth] = useState<string>(MONTHS[new Date().getMonth()]);
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [period, setPeriod] = useState<'monthly' | 'yearly' | 'all'>('monthly');
   
   // Player deposits filtering states
   const [_playerDepositFilters, setPlayerDepositFilters] = useState<{
@@ -77,12 +78,16 @@ const FinancialDashboard: React.FC = () => {
     loadAllData();
   }, []);
 
-  // Load data when month/year changes
+  // Load data when period/month/year changes
   useEffect(() => {
-    if (selectedMonth && selectedYear) {
-      loadFinancialData();
+    if (period === 'monthly' && selectedMonth && selectedYear) {
+      loadFinancialData('monthly');
+    } else if (period === 'yearly' && selectedYear) {
+      loadFinancialData('yearly');
+    } else if (period === 'all') {
+      loadFinancialData('all');
     }
-  }, [selectedMonth, selectedYear]);
+  }, [period, selectedMonth, selectedYear]);
 
   const loadAllData = async () => {
     setLoading(true);
@@ -101,26 +106,35 @@ const FinancialDashboard: React.FC = () => {
     }
   };
 
-  const loadFinancialData = async () => {
+  const loadFinancialData = async (mode?: 'monthly' | 'yearly' | 'all') => {
     try {
-      const [
-        reportData,
-        memberDepositsData,
-        donationsData,
-        expensesData
-      ] = await Promise.all([
-        financialService.getFinancialReport(selectedMonth, selectedYear),
-        financialService.getMemberDeposits(1, 100, selectedMonth, selectedYear),
-        financialService.getDonations(1, 100, selectedMonth, selectedYear),
-        financialService.getExpenses(1, 100, selectedMonth, selectedYear)
-      ]);
-
+      let reportData, memberDepositsData, donationsData, expensesData;
+      if ((mode || period) === 'monthly') {
+        [reportData, memberDepositsData, donationsData, expensesData] = await Promise.all([
+          financialService.getFinancialReport(selectedMonth, selectedYear),
+          financialService.getMemberDeposits(1, 100, selectedMonth, selectedYear),
+          financialService.getDonations(1, 100, selectedMonth, selectedYear),
+          financialService.getExpenses(1, 100, selectedMonth, selectedYear)
+        ]);
+      } else if ((mode || period) === 'yearly') {
+        [reportData, memberDepositsData, donationsData, expensesData] = await Promise.all([
+          financialService.getFinancialReport(undefined, selectedYear),
+          financialService.getMemberDeposits(1, 100, undefined, selectedYear),
+          financialService.getDonations(1, 100, undefined, selectedYear),
+          financialService.getExpenses(1, 100, undefined, selectedYear)
+        ]);
+      } else {
+        [reportData, memberDepositsData, donationsData, expensesData] = await Promise.all([
+          financialService.getFinancialReport(),
+          financialService.getMemberDeposits(1, 100),
+          financialService.getDonations(1, 100),
+          financialService.getExpenses(1, 100)
+        ]);
+      }
       setFinancialReport(reportData);
       setMemberDeposits(memberDepositsData.items || []);
       setDonations(donationsData.items || []);
       setExpenses(expensesData.items || []);
-      
-      // Load player deposits separately to handle filtering
       await loadPlayerDeposits();
     } catch (err) {
       console.error('Error loading financial data:', err);
@@ -244,6 +258,7 @@ const FinancialDashboard: React.FC = () => {
             financialReport={financialReport}
             memberNames={memberNames}
             formatCurrency={formatCurrency}
+            period={period}
           />
         );
 
@@ -327,9 +342,11 @@ const FinancialDashboard: React.FC = () => {
         <FinancialDashboardHeader
           selectedMonth={selectedMonth}
           selectedYear={selectedYear}
+          period={period}
+          onPeriodChange={setPeriod}
           onMonthChange={setSelectedMonth}
           onYearChange={setSelectedYear}
-          onRefresh={loadFinancialData}
+          onRefresh={() => loadFinancialData()}
         />
 
         {error && (
