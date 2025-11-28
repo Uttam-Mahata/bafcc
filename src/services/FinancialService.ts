@@ -93,13 +93,15 @@ export interface ExpenseCreate {
   description?: string;
 }
 
+export interface ExpenseCategorySummary {
+  category: string;
+  amount: number;
+}
+
 export interface FinancialReport {
   month: string;
   year: number;
-  member_deposits: MemberDeposit[];
-  player_deposits: PlayerDeposit[];
-  donations: Donation[];
-  expenses: Expense[];
+  expenses_by_category: ExpenseCategorySummary[];
   total_member_deposits: number;
   total_player_deposits: number;
   total_donations: number;
@@ -125,6 +127,7 @@ export interface PaginatedResponse<T> {
   page: number;
   size: number;
   pages: number;
+  total_amount?: number;
 }
 
 class FinancialService {
@@ -148,7 +151,7 @@ class FinancialService {
     options: RequestInit = {}
   ): Promise<T> {
     const token = AuthService.getInstance().getToken();
-    
+
     const defaultHeaders = {
       'Content-Type': 'application/json',
       ...(token && { Authorization: `Bearer ${token}` }),
@@ -262,7 +265,8 @@ class FinancialService {
     size: number = 10,
     month?: string,
     year?: number,
-    memberId?: number
+    memberId?: number,
+    search?: string
   ): Promise<PaginatedResponse<MemberDeposit>> {
     const params = new URLSearchParams({
       page: page.toString(),
@@ -270,6 +274,7 @@ class FinancialService {
       ...(month && { month }),
       ...(year && { year: year.toString() }),
       ...(memberId && { member_id: memberId.toString() }),
+      ...(search && { search }),
     });
     return this.makeRequest<PaginatedResponse<MemberDeposit>>(`/api/v1/financials/member_deposits/?${params}`);
   }
@@ -299,13 +304,15 @@ class FinancialService {
     page: number = 1,
     size: number = 10,
     month?: string,
-    year?: number
+    year?: number,
+    search?: string
   ): Promise<PaginatedResponse<Donation>> {
     const params = new URLSearchParams({
       page: page.toString(),
       size: size.toString(),
       ...(month && { month }),
       ...(year && { year: year.toString() }),
+      ...(search && { search }),
     });
     return this.makeRequest<PaginatedResponse<Donation>>(`/api/v1/financials/donations/?${params}`);
   }
@@ -335,13 +342,15 @@ class FinancialService {
     page: number = 1,
     size: number = 10,
     month?: string,
-    year?: number
+    year?: number,
+    search?: string
   ): Promise<PaginatedResponse<Expense>> {
     const params = new URLSearchParams({
       page: page.toString(),
       size: size.toString(),
       ...(month && { month }),
       ...(year && { year: year.toString() }),
+      ...(search && { search }),
     });
     return this.makeRequest<PaginatedResponse<Expense>>(`/api/v1/financials/expenses/?${params}`);
   }

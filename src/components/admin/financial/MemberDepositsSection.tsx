@@ -1,5 +1,5 @@
-import React from 'react';
-import { DollarSign, Plus, Edit, Trash2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { DollarSign, Plus, Edit, Trash2, Search, Filter } from 'lucide-react';
 import type { MemberDeposit } from '../../../services/FinancialService';
 import { StatCard } from './StatCard';
 import { BarChart3 } from 'lucide-react';
@@ -11,6 +11,11 @@ interface MemberDepositsSectionProps {
   onEdit: (deposit: MemberDeposit) => void;
   onDelete: (id: number) => void;
   formatCurrency: (amount: number) => string;
+  onFilterChange: (filters: { month?: string; year?: number; memberId?: number; search?: string }) => void;
+  selectedMonth: string;
+  selectedYear: number;
+  memberNames: { id: number; name: string }[];
+  totalAmount: number;
 }
 
 export const MemberDepositsSection: React.FC<MemberDepositsSectionProps> = ({
@@ -18,29 +23,40 @@ export const MemberDepositsSection: React.FC<MemberDepositsSectionProps> = ({
   onAddNew,
   onEdit,
   onDelete,
-  formatCurrency
+  formatCurrency,
+  onFilterChange,
+  selectedMonth,
+  selectedYear,
+  memberNames,
+  totalAmount
 }) => {
-  const [period, setPeriod] = React.useState<'monthly' | 'yearly' | 'all'>('monthly');
-  const [filterMonth, setFilterMonth] = React.useState(MONTHS[new Date().getMonth()]);
-  const [filterYear, setFilterYear] = React.useState(new Date().getFullYear());
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const [selectedMemberId, setSelectedMemberId] = useState<number | undefined>();
+  const [filterMonth, setFilterMonth] = useState(selectedMonth);
+  const [filterYear, setFilterYear] = useState(selectedYear);
 
   // Summary stats
-  const totalAmount = memberDeposits.reduce((sum, d) => sum + (d.amount || 0), 0);
   const totalCount = memberDeposits.length;
 
-  // Handle period change
-  const handlePeriodChange = (newPeriod: 'monthly' | 'yearly' | 'all') => {
-    setPeriod(newPeriod);
-    // TODO: Call parent onFilterChange if you want to fetch data from parent
-  };
-  const handleMonthFilter = (month: string) => {
-    setFilterMonth(month);
-    // TODO: Call parent onFilterChange if you want to fetch data from parent
-  };
-  const handleYearFilter = (year: number) => {
-    setFilterYear(year);
-    // TODO: Call parent onFilterChange if you want to fetch data from parent
-  };
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Trigger filter change when any filter changes
+  useEffect(() => {
+    onFilterChange({
+      month: filterMonth || undefined,
+      year: filterYear,
+      memberId: selectedMemberId,
+      search: debouncedSearchTerm || undefined
+    });
+  }, [debouncedSearchTerm, selectedMemberId, filterMonth, filterYear]);
 
   return (
     <div className="space-y-6">
@@ -58,54 +74,92 @@ export const MemberDepositsSection: React.FC<MemberDepositsSectionProps> = ({
         </button>
       </div>
 
-      {/* Period Dropdown and Summary */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-gray-700">Period:</label>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <StatCard
+          title="Total Amount"
+          value={formatCurrency(totalAmount)}
+          icon={<BarChart3 className="w-5 h-5 text-white" />}
+          color="bg-blue-500"
+        />
+        <StatCard
+          title="Total Deposits"
+          value={totalCount.toString()}
+          icon={<DollarSign className="w-5 h-5 text-white" />}
+          color="bg-green-500"
+        />
+      </div>
+
+      {/* Filters */}
+      <div className="bg-white rounded-lg border border-gray-200 p-4 space-y-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Filter className="w-4 h-4 text-gray-500" />
+          <span className="text-sm font-medium text-gray-700">Filters & Search</span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Search by member name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          {/* Member Filter */}
           <select
-            value={period}
-            onChange={e => handlePeriodChange(e.target.value as 'monthly' | 'yearly' | 'all')}
+            value={selectedMemberId || ''}
+            onChange={(e) => setSelectedMemberId(e.target.value ? parseInt(e.target.value) : undefined)}
             className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
-            <option value="monthly">Monthly</option>
-            <option value="yearly">Yearly</option>
-            <option value="all">All Time</option>
+            <option value="">All Members</option>
+            {memberNames.map((member) => (
+              <option key={member.id} value={member.id}>
+                {member.name}
+              </option>
+            ))}
           </select>
-          {period === 'monthly' && (
-            <select
-              value={filterMonth}
-              onChange={e => handleMonthFilter(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              {MONTHS.map((month) => (
-                <option key={month} value={month}>{month}</option>
-              ))}
-            </select>
-          )}
-          {(period === 'monthly' || period === 'yearly') && (
-            <input
-              type="number"
-              value={filterYear}
-              onChange={e => handleYearFilter(parseInt(e.target.value))}
-              className="border border-gray-300 rounded-lg px-3 py-2 w-20 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              min="2020"
-              max="2030"
-            />
-          )}
-        </div>
-        <div className="flex gap-4 mt-4 md:mt-0">
-          <StatCard
-            title="Total Amount"
-            value={formatCurrency(totalAmount)}
-            icon={<BarChart3 className="w-5 h-5 text-white" />}
-            color="bg-blue-500"
+
+          {/* Month Filter */}
+          <select
+            value={filterMonth}
+            onChange={(e) => setFilterMonth(e.target.value)}
+            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="">All Months</option>
+            {MONTHS.map((month) => (
+              <option key={month} value={month}>
+                {month}
+              </option>
+            ))}
+          </select>
+
+          {/* Year Filter */}
+          <input
+            type="number"
+            placeholder="Year"
+            value={filterYear || ''}
+            onChange={(e) => setFilterYear(parseInt(e.target.value) || new Date().getFullYear())}
+            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            min="2020"
+            max="2030"
           />
-          <StatCard
-            title="Total Deposits"
-            value={totalCount.toString()}
-            icon={<DollarSign className="w-5 h-5 text-white" />}
-            color="bg-green-500"
-          />
+
+          {/* Clear Filters */}
+          <button
+            onClick={() => {
+              setSearchTerm('');
+              setSelectedMemberId(undefined);
+              setFilterMonth('');
+              setFilterYear(new Date().getFullYear());
+            }}
+            className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Clear
+          </button>
         </div>
       </div>
 

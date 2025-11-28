@@ -79,7 +79,7 @@ export interface ApplicationWithImages {
 export class ApplicationService {
     private static instance: ApplicationService;
 
-    private constructor() {}
+    private constructor() { }
 
     static getInstance(): ApplicationService {
         if (!ApplicationService.instance) {
@@ -88,8 +88,17 @@ export class ApplicationService {
         return ApplicationService.instance;
     }
 
-    async getApplications(page: number = 1, size: number = 100): Promise<ApplicationsResponse> {
-        const response = await axios.get<ApplicationsResponse>(`${API_URL}/api/v1/applications/?page=${page}&size=${size}`);
+    async getApplications(
+        page: number = 1,
+        size: number = 100,
+        category?: string,
+        search?: string
+    ): Promise<ApplicationsResponse> {
+        let url = `${API_URL}/api/v1/applications/?page=${page}&size=${size}`;
+        if (category) url += `&category=${category}`;
+        if (search) url += `&search=${search}`;
+
+        const response = await axios.get<ApplicationsResponse>(url);
         return response.data;
     }
 
