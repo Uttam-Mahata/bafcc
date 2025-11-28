@@ -93,26 +93,18 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
               Expenses by Category
             </h3>
             <div className="space-y-3">
-              {financialReport.expenses && financialReport.expenses.length > 0 ? (
-                financialReport.expenses.reduce((acc: Record<string, number>, expense) => {
-                  acc[expense.category] = (acc[expense.category] || 0) + expense.amount;
-                  return acc;
-                }, {} as Record<string, number>)) && Object.entries(
-                  financialReport.expenses.reduce((acc: Record<string, number>, expense) => {
-                    acc[expense.category] = (acc[expense.category] || 0) + expense.amount;
-                    return acc;
-                  }, {} as Record<string, number>)
-                ).map(([category, amount]) => (
-                  <div key={category} className="flex justify-between items-center">
-                    <span className="text-gray-600">{category}</span>
+              {financialReport.expenses_by_category && financialReport.expenses_by_category.length > 0 ? (
+                financialReport.expenses_by_category.map((expense) => (
+                  <div key={expense.category} className="flex justify-between items-center">
+                    <span className="text-gray-600">{expense.category}</span>
                     <span className="font-semibold text-red-600">
-                      {formatCurrency(amount)}
+                      {formatCurrency(expense.amount)}
                     </span>
                   </div>
-                )) : (
-                  <p className="text-gray-500 italic">No expenses recorded for this month</p>
-                )
-              }
+                ))
+              ) : (
+                <p className="text-gray-500 italic">No expenses recorded for this month</p>
+              )}
             </div>
           </div>
         </div>

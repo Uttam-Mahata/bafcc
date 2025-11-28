@@ -33,7 +33,7 @@ const FinancialDashboard: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState<string>(MONTHS[new Date().getMonth()]);
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [period, setPeriod] = useState<'monthly' | 'yearly' | 'all'>('monthly');
-  
+
   // Player deposits filtering states
   const [_playerDepositFilters, setPlayerDepositFilters] = useState<{
     month?: string;
@@ -41,7 +41,27 @@ const FinancialDashboard: React.FC = () => {
     playerId?: number;
     search?: string;
   }>({});
-  
+
+  // Other section filters
+  const [memberDepositFilters, setMemberDepositFilters] = useState<{
+    month?: string;
+    year?: number;
+    memberId?: number;
+    search?: string;
+  }>({});
+
+  const [donationFilters, setDonationFilters] = useState<{
+    month?: string;
+    year?: number;
+    search?: string;
+  }>({});
+
+  const [expenseFilters, setExpenseFilters] = useState<{
+    month?: string;
+    year?: number;
+    search?: string;
+  }>({});
+
   // Data states
   const [financialReport, setFinancialReport] = useState<FinancialReport | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
@@ -51,12 +71,18 @@ const FinancialDashboard: React.FC = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [playerNames, setPlayerNames] = useState<PlayerName[]>([]);
   const [memberNames, setMemberNames] = useState<MemberName[]>([]);
-  
+
+  // Total amounts state
+  const [playerDepositsTotalAmount, setPlayerDepositsTotalAmount] = useState<number>(0);
+  const [memberDepositsTotalAmount, setMemberDepositsTotalAmount] = useState<number>(0);
+  const [donationsTotalAmount, setDonationsTotalAmount] = useState<number>(0);
+  const [expensesTotalAmount, setExpensesTotalAmount] = useState<number>(0);
+
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState<FormType>('member');
   const [editingItem, setEditingItem] = useState<EditingItem | null>(null);
-  
+
   // Loading state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -108,34 +134,30 @@ const FinancialDashboard: React.FC = () => {
 
   const loadFinancialData = async (mode?: 'monthly' | 'yearly' | 'all') => {
     try {
-      let reportData, memberDepositsData, donationsData, expensesData;
-      if ((mode || period) === 'monthly') {
-        [reportData, memberDepositsData, donationsData, expensesData] = await Promise.all([
-          financialService.getFinancialReport(selectedMonth, selectedYear),
-          financialService.getMemberDeposits(1, 100, selectedMonth, selectedYear),
-          financialService.getDonations(1, 100, selectedMonth, selectedYear),
-          financialService.getExpenses(1, 100, selectedMonth, selectedYear)
-        ]);
-      } else if ((mode || period) === 'yearly') {
-        [reportData, memberDepositsData, donationsData, expensesData] = await Promise.all([
-          financialService.getFinancialReport(undefined, selectedYear),
-          financialService.getMemberDeposits(1, 100, undefined, selectedYear),
-          financialService.getDonations(1, 100, undefined, selectedYear),
-          financialService.getExpenses(1, 100, undefined, selectedYear)
-        ]);
-      } else {
-        [reportData, memberDepositsData, donationsData, expensesData] = await Promise.all([
-          financialService.getFinancialReport(),
-          financialService.getMemberDeposits(1, 100),
-          financialService.getDonations(1, 100),
-          financialService.getExpenses(1, 100)
-        ]);
-      }
+      let reportData;
+
+      // Determine base filters based on mode and selected month/year
+      const currentMode = mode || period;
+      const baseMonth = currentMode === 'monthly' ? selectedMonth : undefined;
+      const baseYear = (currentMode === 'monthly' || currentMode === 'yearly') ? selectedYear : undefined;
+
+      // Load report
+      reportData = await financialService.getFinancialReport(baseMonth, baseYear);
       setFinancialReport(reportData);
-      setMemberDeposits(memberDepositsData.items || []);
-      setDonations(donationsData.items || []);
-      setExpenses(expensesData.items || []);
-      await loadPlayerDeposits();
+
+      // Load sections with their specific filters combined with base filters (if applicable)
+      // Note: The sections manage their own filters, so we should use those if set, 
+      // OR default to the global dashboard filters if the section filters are empty/default.
+      // However, the current design in PlayerDepositsSection uses local state for filters and calls onFilterChange.
+      // Ideally, we should fetch data based on the specific filters for each section.
+
+      await Promise.all([
+        loadMemberDeposits(memberDepositFilters),
+        loadDonations(donationFilters),
+        loadExpenses(expenseFilters),
+        loadPlayerDeposits(_playerDepositFilters)
+      ]);
+
     } catch (err) {
       console.error('Error loading financial data:', err);
       setError(err instanceof Error ? err.message : 'Failed to load financial data');
@@ -169,6 +191,46 @@ const FinancialDashboard: React.FC = () => {
     }
   };
 
+  const loadMemberDeposits = async (filters?: any) => {
+    try {
+      // If no specific filters, use global dashboard defaults
+      const month = filters?.month || (period === 'monthly' ? selectedMonth : undefined);
+      const year = filters?.year || ((period === 'monthly' || period === 'yearly') ? selectedYear : undefined);
+
+      const data = await financialService.getMemberDeposits(1, 100, month, year, filters?.memberId, filters?.search);
+      setMemberDeposits(data.items || []);
+      setMemberDepositsTotalAmount(data.total_amount || 0);
+    } catch (err) {
+      console.error('Error loading member deposits:', err);
+    }
+  };
+
+  const loadDonations = async (filters?: any) => {
+    try {
+      const month = filters?.month || (period === 'monthly' ? selectedMonth : undefined);
+      const year = filters?.year || ((period === 'monthly' || period === 'yearly') ? selectedYear : undefined);
+
+      const data = await financialService.getDonations(1, 100, month, year, filters?.search);
+      setDonations(data.items || []);
+      setDonationsTotalAmount(data.total_amount || 0);
+    } catch (err) {
+      console.error('Error loading donations:', err);
+    }
+  };
+
+  const loadExpenses = async (filters?: any) => {
+    try {
+      const month = filters?.month || (period === 'monthly' ? selectedMonth : undefined);
+      const year = filters?.year || ((period === 'monthly' || period === 'yearly') ? selectedYear : undefined);
+
+      const data = await financialService.getExpenses(1, 100, month, year, filters?.search);
+      setExpenses(data.items || []);
+      setExpensesTotalAmount(data.total_amount || 0);
+    } catch (err) {
+      console.error('Error loading expenses:', err);
+    }
+  };
+
   const loadPlayerDeposits = async (filters?: {
     month?: string;
     year?: number;
@@ -176,28 +238,43 @@ const FinancialDashboard: React.FC = () => {
     search?: string;
   }) => {
     try {
+      // If no specific filters, use global dashboard defaults
+      const month = filters?.month || (period === 'monthly' ? selectedMonth : undefined);
+      const year = filters?.year || ((period === 'monthly' || period === 'yearly') ? selectedYear : undefined);
+
       const playerDepositsData = await financialService.getPlayerDeposits(
-        1, 
-        100, 
-        filters?.month || selectedMonth, 
-        filters?.year || selectedYear,
+        1,
+        100,
+        month,
+        year,
         filters?.playerId,
         filters?.search
       );
       setPlayerDeposits(playerDepositsData.items || []);
+      setPlayerDepositsTotalAmount(playerDepositsData.total_amount || 0);
     } catch (err) {
       console.error('Error loading player deposits:', err);
     }
   };
 
-  const handlePlayerDepositFilterChange = (filters: {
-    month?: string;
-    year?: number;
-    playerId?: number;
-    search?: string;
-  }) => {
+  const handlePlayerDepositFilterChange = (filters: any) => {
     setPlayerDepositFilters(filters);
     loadPlayerDeposits(filters);
+  };
+
+  const handleMemberDepositFilterChange = (filters: any) => {
+    setMemberDepositFilters(filters);
+    loadMemberDeposits(filters);
+  };
+
+  const handleDonationFilterChange = (filters: any) => {
+    setDonationFilters(filters);
+    loadDonations(filters);
+  };
+
+  const handleExpenseFilterChange = (filters: any) => {
+    setExpenseFilters(filters);
+    loadExpenses(filters);
   };
 
   // Modal handlers
@@ -284,6 +361,7 @@ const FinancialDashboard: React.FC = () => {
             selectedMonth={selectedMonth}
             selectedYear={selectedYear}
             onFilterChange={handlePlayerDepositFilterChange}
+            totalAmount={playerDepositsTotalAmount}
           />
         );
 
@@ -295,6 +373,11 @@ const FinancialDashboard: React.FC = () => {
             onEdit={(deposit) => openModal('member-deposit', deposit)}
             onDelete={(id) => handleDelete('member-deposit', id)}
             formatCurrency={formatCurrency}
+            onFilterChange={handleMemberDepositFilterChange}
+            selectedMonth={selectedMonth}
+            selectedYear={selectedYear}
+            memberNames={memberNames}
+            totalAmount={memberDepositsTotalAmount}
           />
         );
 
@@ -306,6 +389,10 @@ const FinancialDashboard: React.FC = () => {
             onEdit={(donation) => openModal('donation', donation)}
             onDelete={(id) => handleDelete('donation', id)}
             formatCurrency={formatCurrency}
+            onFilterChange={handleDonationFilterChange}
+            selectedMonth={selectedMonth}
+            selectedYear={selectedYear}
+            totalAmount={donationsTotalAmount}
           />
         );
 
@@ -317,6 +404,10 @@ const FinancialDashboard: React.FC = () => {
             onEdit={(expense) => openModal('expense', expense)}
             onDelete={(id) => handleDelete('expense', id)}
             formatCurrency={formatCurrency}
+            onFilterChange={handleExpenseFilterChange}
+            selectedMonth={selectedMonth}
+            selectedYear={selectedYear}
+            totalAmount={expensesTotalAmount}
           />
         );
 

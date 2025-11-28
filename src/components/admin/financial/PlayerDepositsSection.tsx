@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TrendingUp, Plus, Edit, Trash2, Search, Filter, BarChart3 } from 'lucide-react';
 import type { PlayerDeposit, PlayerName } from '../../../services/FinancialService';
 import { MONTHS } from './constants';
@@ -13,7 +13,8 @@ interface PlayerDepositsSectionProps {
   playerNames: PlayerName[];
   selectedMonth: string;
   selectedYear: number;
-  onFilterChange: (filters: { month?: string; year?: number; playerId?: number; search?: string; period?: 'monthly' | 'yearly' | 'all' }) => void;
+  onFilterChange: (filters: { month?: string; year?: number; playerId?: number; search?: string }) => void;
+  totalAmount: number;
 }
 
 export const PlayerDepositsSection: React.FC<PlayerDepositsSectionProps> = ({
@@ -25,67 +26,37 @@ export const PlayerDepositsSection: React.FC<PlayerDepositsSectionProps> = ({
   playerNames,
   selectedMonth,
   selectedYear,
-  onFilterChange
+  onFilterChange,
+  totalAmount
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [selectedPlayerId, setSelectedPlayerId] = useState<number | undefined>();
   const [filterMonth, setFilterMonth] = useState(selectedMonth);
   const [filterYear, setFilterYear] = useState(selectedYear);
-  const [period, setPeriod] = useState<'monthly' | 'yearly' | 'all'>('monthly');
 
   // Summary stats
-  const totalAmount = playerDeposits.reduce((sum, d) => sum + (d.amount || 0), 0);
-  const totalCount = playerDeposits.length;
+  // const totalAmount is now passed as prop
+  const totalCount = playerDeposits.length; // Note: This is count of current page items, ideally should be total count from API too
 
-  const handleSearchChange = (value: string) => {
-    setSearchTerm(value);
-    onFilterChange({ 
-      month: filterMonth, 
-      year: filterYear, 
-      playerId: selectedPlayerId, 
-      search: value,
-      period: period
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Trigger filter change when any filter changes
+  useEffect(() => {
+    onFilterChange({
+      month: filterMonth || undefined,
+      year: filterYear,
+      playerId: selectedPlayerId,
+      search: debouncedSearchTerm || undefined
     });
-  };
-
-  const handlePlayerFilter = (playerId: number | undefined) => {
-    setSelectedPlayerId(playerId);
-    onFilterChange({ 
-      month: filterMonth, 
-      year: filterYear, 
-      playerId, 
-      search: searchTerm,
-      period: period
-    });
-  };
-
-  // Handle period change
-  const handlePeriodChange = (newPeriod: 'monthly' | 'yearly' | 'all') => {
-    setPeriod(newPeriod);
-    if (newPeriod === 'monthly') {
-      onFilterChange({ month: filterMonth, year: filterYear, playerId: selectedPlayerId, search: searchTerm, period: newPeriod });
-    } else if (newPeriod === 'yearly') {
-      onFilterChange({ year: filterYear, playerId: selectedPlayerId, search: searchTerm, period: newPeriod });
-    } else {
-      onFilterChange({ playerId: selectedPlayerId, search: searchTerm, period: newPeriod });
-    }
-  };
-
-  // Update filters when month/year changes
-  const handleMonthFilter = (month: string) => {
-    setFilterMonth(month);
-    if (period === 'monthly') {
-      onFilterChange({ month, year: filterYear, playerId: selectedPlayerId, search: searchTerm, period });
-    }
-  };
-  const handleYearFilter = (year: number) => {
-    setFilterYear(year);
-    if (period === 'monthly') {
-      onFilterChange({ month: filterMonth, year, playerId: selectedPlayerId, search: searchTerm, period });
-    } else if (period === 'yearly') {
-      onFilterChange({ year, playerId: selectedPlayerId, search: searchTerm, period });
-    }
-  };
+  }, [debouncedSearchTerm, selectedPlayerId, filterMonth, filterYear]);
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return '-';
@@ -108,64 +79,28 @@ export const PlayerDepositsSection: React.FC<PlayerDepositsSectionProps> = ({
         </button>
       </div>
 
-      {/* Period Dropdown and Summary */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-gray-700">Period:</label>
-          <select
-            value={period}
-            onChange={e => handlePeriodChange(e.target.value as 'monthly' | 'yearly' | 'all')}
-            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="monthly">Monthly</option>
-            <option value="yearly">Yearly</option>
-            <option value="all">All Time</option>
-          </select>
-          {period === 'monthly' && (
-            <select
-              value={filterMonth}
-              onChange={e => handleMonthFilter(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              {MONTHS.map((month) => (
-                <option key={month} value={month}>{month}</option>
-              ))}
-            </select>
-          )}
-          {(period === 'monthly' || period === 'yearly') && (
-            <input
-              type="number"
-              value={filterYear}
-              onChange={e => handleYearFilter(parseInt(e.target.value))}
-              className="border border-gray-300 rounded-lg px-3 py-2 w-20 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              min="2020"
-              max="2030"
-            />
-          )}
-        </div>
-        <div className="flex gap-4 mt-4 md:mt-0">
-          <StatCard
-            title="Total Amount"
-            value={formatCurrency(totalAmount)}
-            icon={<BarChart3 className="w-5 h-5 text-white" />}
-            color="bg-green-500"
-          />
-          <StatCard
-            title="Total Deposits"
-            value={totalCount.toString()}
-            icon={<TrendingUp className="w-5 h-5 text-white" />}
-            color="bg-blue-500"
-          />
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <StatCard
+          title="Total Amount"
+          value={formatCurrency(totalAmount)}
+          icon={<BarChart3 className="w-5 h-5 text-white" />}
+          color="bg-green-500"
+        />
+        <StatCard
+          title="Total Deposits"
+          value={totalCount.toString()}
+          icon={<TrendingUp className="w-5 h-5 text-white" />}
+          color="bg-blue-500"
+        />
       </div>
 
-      {/* Advanced Filters */}
+      {/* Filters */}
       <div className="bg-white rounded-lg border border-gray-200 p-4 space-y-4">
         <div className="flex items-center gap-2 mb-3">
           <Filter className="w-4 h-4 text-gray-500" />
           <span className="text-sm font-medium text-gray-700">Filters & Search</span>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           {/* Search */}
           <div className="relative">
@@ -174,7 +109,7 @@ export const PlayerDepositsSection: React.FC<PlayerDepositsSectionProps> = ({
               type="text"
               placeholder="Search by name, reg. no..."
               value={searchTerm}
-              onChange={(e) => handleSearchChange(e.target.value)}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
@@ -182,7 +117,7 @@ export const PlayerDepositsSection: React.FC<PlayerDepositsSectionProps> = ({
           {/* Player Filter */}
           <select
             value={selectedPlayerId || ''}
-            onChange={(e) => handlePlayerFilter(e.target.value ? parseInt(e.target.value) : undefined)}
+            onChange={(e) => setSelectedPlayerId(e.target.value ? parseInt(e.target.value) : undefined)}
             className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">All Players</option>
@@ -196,7 +131,7 @@ export const PlayerDepositsSection: React.FC<PlayerDepositsSectionProps> = ({
           {/* Month Filter */}
           <select
             value={filterMonth}
-            onChange={(e) => handleMonthFilter(e.target.value)}
+            onChange={(e) => setFilterMonth(e.target.value)}
             className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">All Months</option>
@@ -212,7 +147,7 @@ export const PlayerDepositsSection: React.FC<PlayerDepositsSectionProps> = ({
             type="number"
             placeholder="Year"
             value={filterYear || ''}
-            onChange={(e) => handleYearFilter(parseInt(e.target.value) || new Date().getFullYear())}
+            onChange={(e) => setFilterYear(parseInt(e.target.value) || new Date().getFullYear())}
             className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             min="2020"
             max="2030"
@@ -225,7 +160,6 @@ export const PlayerDepositsSection: React.FC<PlayerDepositsSectionProps> = ({
               setSelectedPlayerId(undefined);
               setFilterMonth('');
               setFilterYear(new Date().getFullYear());
-              onFilterChange({});
             }}
             className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
